@@ -1,6 +1,6 @@
 {
     "name": "openshift-cartridge-nodejs",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Custom Node.js cartridge for OpenShift - sample application",
     "dependencies": {
         "hubot": "^2.6.0",
