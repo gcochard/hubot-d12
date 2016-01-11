@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.5
+// @version      1.0.6
 // @description  calls hubot with the current player
 // @author       Greg Cochard
 // @match        http://dominating12.com/?cmd=game&sec=play&id=*
@@ -38,8 +38,12 @@ function signalToHubot(player){
         Ext.Ajax.request({
             url: "https://hubot-gregcochard.rhcloud.com/hubot/pushturn",
             method: 'GET',
-            success: console.log,
-            failure: console.error,
+            success: function(){
+                console.log(arguments);
+            },
+            failure: function(){
+                console.error(arguments);
+            },
             params: {
                 user: users[player]
             }
