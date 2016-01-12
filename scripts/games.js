@@ -693,7 +693,7 @@ module.exports = function(robot) {
         var payload = req.query.user;
         var ref = req.get('referrer');
         var refObj = url.parse(ref,true);
-        var game = refObj.query.id;
+        var game = ref.split('/').pop();
         robot.logger.info('announcing game '+game+' turn');
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);

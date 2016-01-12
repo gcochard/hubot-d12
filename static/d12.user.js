@@ -2,13 +2,13 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.6
+// @version      1.0.7
 // @description  calls hubot with the current player
 // @author       Greg Cochard
-// @match        http://dominating12.com/?cmd=game&sec=play&id=*
-// @match        http://dominating12.com/index.php?cmd=game&sec=play&id=*
-// @match        http://www.dominating12.com/?cmd=game&sec=play&id=*
-// @match        http://www.dominating12.com/index.php?cmd=game&sec=play&id=*
+// @match        http://dominating12.com/game/*
+// @match        http://www.dominating12.com//game/*
+// @match        https://dominating12.com/game/*
+// @match        https://www.dominating12.com//game/*
 // @grant        none
 // ==/UserScript==
 /*global Ext: false*/
@@ -35,7 +35,7 @@ function signalToHubot(player){
     }
 
     setTimeout(function(){
-        Ext.Ajax.request({
+        $.ajax({
             url: "https://hubot-gregcochard.rhcloud.com/hubot/pushturn",
             method: 'GET',
             success: function(){
@@ -44,7 +44,7 @@ function signalToHubot(player){
             failure: function(){
                 console.error(arguments);
             },
-            params: {
+            data: {
                 user: users[player]
             }
         });
@@ -54,13 +54,13 @@ function signalToHubot(player){
 function fetchTreaties(cb){
     'use strict';
     var called = false;
-    Ext.Ajax.request({
+    $.ajax({
         url: "https://hubot-gregcochard.rhcloud.com/hubot/treaties",
         method: 'GET',
         success: function(data){
             if(called){ return; }
             called = true;
-            cb(null, JSON.parse(data.responseText));
+            cb(null, data.responseText);
         },
         failure: function(e){
             if(called) { return; }
@@ -87,7 +87,9 @@ function showTreatyError(err){
 
 function showTreaties(data){
     'use strict';
-    Ext.get('game-invites') && Ext.get('game-invites').remove();
+    console.log(data);
+    return;
+    Ext && Ext.get('game-invites') && Ext.get('game-invites').remove();
     // we are piggy-backing on the game-invites container here...
     Ext.DomHelper.append('body', {tag: 'ul', id: 'game-invites'});
     if(hidden){
@@ -148,7 +150,7 @@ function getQueue(){
 }
 
 function sendDiceToHubot(player, attack, defend){
-    Ext.Ajax.request({
+    $.ajax({
         url: "https://hubot-gregcochard.rhcloud.com/hubot/pushdice",
         method: 'POST',
         success: function(){
@@ -171,7 +173,7 @@ function mapInt(n){
     return parseInt(n,10);
 }
 hidden = false;
-Ext.onReady(function(){
+$(document).ready(function(){
     'use strict';
     var oldRemoveInvites = window.removeInvites;
     window.removeInvites = function(){
@@ -190,7 +192,7 @@ Ext.onReady(function(){
         sendDiceToHubot(currPlayer,att,def);
         oldDisplayRoll(att,def);
     };
-
+/*
     setTimeout(function(){
         Ext.DomHelper.append('uPanel-info', {tag: 'span', id: 'separator', html: ' | '});
         Ext.DomHelper.append('uPanel-info', {tag: 'a', id: 'toggle-treaty', html: 'toggle treaties'});
@@ -199,20 +201,21 @@ Ext.onReady(function(){
             Ext.get('game-invites').toggle();
         });
     }, 2000);
-
+*/
     var curPlayer;
     function pollPlayer(){
-        players = Ext.DomQuery.select('tr > .name > a');
-        players = players.map(function(v){
+        players = $('tr > .name > a');
+        players = players.map(function(idx,v){
+            var $v = $(v);
             // set the color of the player
-            var node = v.parentNode.parentNode.lastChild.lastChild;
-            playerColors[v.innerHTML] = (node.textContent || node.innerText).toLowerCase();
-            return v.innerHTML;
+            var node = $v.parent().parent().children(':last').children(':last').children(':last');
+            playerColors[$v.html()] = node.text().toLowerCase();
+            return $v.html();
         });
         if(!players.length){
             return;
         }
-        var newPlayer = Ext.DomQuery.select('tr:has(.isTurn):last > .name > a') || [];
+        var newPlayer = $('td.turn').parent().find('.name > a') || [];
         newPlayer = newPlayer[0] || {};
         newPlayer = newPlayer.innerHTML || '';
         if(!newPlayer){
@@ -234,3 +237,4 @@ Ext.onReady(function(){
     // poll treaties at a 15 second interval
     setInterval(pollTreaties,15000);
 });
+
