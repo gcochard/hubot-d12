@@ -703,7 +703,7 @@ module.exports = function(robot) {
             if(!(/^@/.test(payload))){
                 payload = '@'+payload;
             }
-            payload += ' it\'s your turn in game ' + game + ', http://dominating12.com/?cmd=game&sec=play&id=' + game;
+            payload += ' it\'s your turn in game ' + game + ', http://dominating12.com/game/' + game;
             robot.messageRoom(gameRoom,payload);
         }
     });
