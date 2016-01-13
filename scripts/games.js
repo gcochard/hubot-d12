@@ -278,7 +278,7 @@ module.exports = function(robot) {
                     currPlayers[gameId] = newPlayer;
                     isNew = true;
                 }
-                message += 'it is '+(isNew?'@':'')+newPlayer+'\'s turn in game ' + gameId + ', http://dominating12.com/?cmd=game&sec=play&id=' + gameId;
+                message += 'it is '+(isNew?'@':'')+newPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
                 robot.brain.set('currentPlayers',currPlayers);
             }
             if(message){

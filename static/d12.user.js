@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.7
+// @version      1.0.8
 // @description  calls hubot with the current player
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -169,9 +169,6 @@ function sendDiceToHubot(player, attack, defend){
         }
     });
 }
-function mapInt(n){
-    return parseInt(n,10);
-}
 hidden = false;
 $(document).ready(function(){
     'use strict';
@@ -182,16 +179,12 @@ $(document).ready(function(){
         }
     };
     
-    var oldDisplayRoll = window.displayRoll;
-    window.displayRoll = function(att,def){
-        var currPlayer = Ext.DomQuery.select('tr:has(.isTurn):last > .name > a') || [];
-        currPlayer = currPlayer[0] || {};
-        currPlayer = currPlayer.innerHTML || '';
-        att = att.map(mapInt);
-        def = def.map(mapInt);
-        sendDiceToHubot(currPlayer,att,def);
-        oldDisplayRoll(att,def);
+    var oldShowDice = playGame.showDice;
+    playGame.showDice = function(att,att_color,def,def_color){
+        sendDiceToHubot(getPlayer(),att,def);
+        return oldShowDice.call(playGame,att,att_color,def,def_color);
     };
+
 /*
     setTimeout(function(){
         Ext.DomHelper.append('uPanel-info', {tag: 'span', id: 'separator', html: ' | '});
@@ -203,7 +196,8 @@ $(document).ready(function(){
     }, 2000);
 */
     var curPlayer;
-    function pollPlayer(){
+
+    function getPlayer(){
         players = $('tr > .name > a');
         players = players.map(function(idx,v){
             var $v = $(v);
@@ -215,12 +209,15 @@ $(document).ready(function(){
         if(!players.length){
             return;
         }
-        var newPlayer = $('td.turn').parent().find('.name > a') || [];
-        newPlayer = newPlayer[0] || {};
-        newPlayer = newPlayer.innerHTML || '';
+        var newPlayer = $('td.turn').parent().find('.name > a');
         if(!newPlayer){
             return;
         }
+        newPlayer = newPlayer.html();
+        return newPlayer;
+    }
+    function pollPlayer(){
+        newPlayer = getPlayer();
         if(!curPlayer){
             curPlayer = newPlayer;
             signalToHubot(curPlayer);
