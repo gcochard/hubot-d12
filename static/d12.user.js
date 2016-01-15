@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.14
+// @version      1.0.15
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -259,8 +259,8 @@ $(document).ready(function(){
         }
     }
     pollPlayer();
-    // fallback to polling at 20s interval if change detection doesn't work
-    playerPollInterval = setInterval(pollPlayer,20000);
+    // fallback to polling at 300s interval if change detection doesn't work
+    playerPollInterval = setInterval(pollPlayer,300000);
     
     setTimeout(pollTreaties,2000);
     // poll treaties at a 15 second interval
