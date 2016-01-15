@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.12
+// @version      1.0.13
 // @description  calls hubot with the current player
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -227,6 +227,15 @@ $(document).ready(function(){
         newPlayer = newPlayer.html();
         return newPlayer;
     }
+    (function injectChangeDetection(){
+        var oldShowNotification = PlayGame.showNotificationBanner;
+        PlayGame.showNotificationBanner = function(color, message){
+            switch(message){
+            'Turn finished.': pollPlayer(); break;
+            }
+            return oldShowNotification.apply(this,Array.prototype.slice.call(arguments));
+        };
+    }());
     function pollPlayer(){
         var newPlayer = getPlayer();
         if(!curPlayer){
@@ -239,7 +248,8 @@ $(document).ready(function(){
         }
     }
     pollPlayer();
-    playerPollInterval = setInterval(pollPlayer,2000);
+    // fallback to polling at 20s interval if change detection doesn't work
+    playerPollInterval = setInterval(pollPlayer,20000);
     
     setTimeout(pollTreaties,2000);
     // poll treaties at a 15 second interval
