@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.10
+// @version      1.0.11
 // @description  calls hubot with the current player
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -163,7 +163,7 @@ function sendDiceToHubot(player, attack, defend){
         failure: function(){
             queueDice(player, attack, defend);
         },
-        params: {
+        data: {
             player: player,
             attack: attack,
             defend: defend
