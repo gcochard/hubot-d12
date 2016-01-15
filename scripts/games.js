@@ -758,6 +758,9 @@ module.exports = function(robot) {
         checkWebsite(robot.messageRoom.bind(robot,gameRoom),true);
     });
 
+    function detectGame(ref){
+        return ref.split('/').pop();
+    }
     function serveScript(name,req,res){
         res.sendfile(path.resolve(__dirname,'..','static',name));
     }
@@ -779,13 +782,14 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
+
     robot.router.get('/hubot/pushturn',function(req,res){
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player now';
         res.send(response);
         var payload = req.query.user;
-        var ref = req.get('referrer');
+        var game = detectGame(req.get('referrer'));
         var refObj = url.parse(ref,true);
         var game = ref.split('/').pop();
         robot.logger.info('announcing game '+game+' turn');
@@ -822,9 +826,7 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot saved statistics';
         var player = req.body.player;
-        var ref = req.get('referrer');
-        var refObj = url.parse(ref,true);
-        var game = refObj.query.id;
+        var game = detectGame(req.get('referrer'));
         var stats = robot.brain.get('stats') || {};
         stats[game] = stats[game] || [];
         stats[game].push(req.body);
