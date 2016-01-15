@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.9
+// @version      1.0.10
 // @description  calls hubot with the current player
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -26,9 +26,9 @@ var users = {
     , loneWolf55: 'channel'
     , suntan: 'tanleach1001'
     , tanleach1001: 'suntan'
-}, players = [], playerColors = {};
+}, players = [], playerColors = {}, playerPollInterval, treatyPollInterval;
 
-function signalToHubot(player){
+function signalToHubot(player,ended){
     'use strict';
     if(!users[player]){
         return;
@@ -45,7 +45,8 @@ function signalToHubot(player){
                 console.error(arguments);
             },
             data: {
-                user: users[player]
+                user: users[player],
+                ended: ended
             }
         });
     },100);
@@ -182,7 +183,17 @@ $(document).ready(function(){
     var oldShowDice = playGame.showDice;
     playGame.showDice = function(att,att_color,def,def_color){
         sendDiceToHubot(getPlayer(),att,def);
-        return oldShowDice.call(playGame,att,att_color,def,def_color);
+        return oldShowDice.call(this,att,att_color,def,def_color);
+    };
+
+    var oldRunUpdates = playGame.runUpdates;
+    playGame.runUpdates = function(result){
+        if(result.winner){
+            signalToHubot(result.winner.names.join(', '), true);
+            clearInterval(playerPollInterval);
+            clearInterval(treatyPollInterval);
+        }
+        return oldRunUpdates.call(this,results);
     };
 
 /*
@@ -228,10 +239,10 @@ $(document).ready(function(){
         }
     }
     pollPlayer();
-    setInterval(pollPlayer,2000);
+    playerPollInterval = setInterval(pollPlayer,2000);
     
     setTimeout(pollTreaties,2000);
     // poll treaties at a 15 second interval
-    setInterval(pollTreaties,15000);
+    treatyPollInterval = setInterval(pollTreaties,15000);
 });
 
