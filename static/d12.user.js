@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.13
+// @version      1.0.14
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -11,7 +11,9 @@
 // @match        https://www.dominating12.com//game/*
 // @grant        none
 // ==/UserScript==
-/*global Ext: false*/
+/*global $: false, playGame: true*/
+/*eslint-env browser*/
+/*eslint no-console: 0*/
 console.log('injected!');
 var users = {
     gcochard: 'greg'
@@ -36,7 +38,7 @@ function signalToHubot(player,ended){
 
     setTimeout(function(){
         $.ajax({
-            url: "https://hubot-gregcochard.rhcloud.com/hubot/pushturn",
+            url: 'https://hubot-gregcochard.rhcloud.com/hubot/pushturn',
             method: 'GET',
             success: function(){
                 console.log(arguments);
@@ -56,7 +58,7 @@ function fetchTreaties(cb){
     'use strict';
     var called = false;
     $.ajax({
-        url: "https://hubot-gregcochard.rhcloud.com/hubot/treaties",
+        url: 'https://hubot-gregcochard.rhcloud.com/hubot/treaties',
         method: 'GET',
         success: function(data){
             if(called){ return; }
@@ -74,6 +76,7 @@ function fetchTreaties(cb){
 function showTreatyError(err){
     'use strict';
     console.log(err);
+    /*
     var treatyErr = err.statusText;
     if(!Ext.get('game-invites')){
         // we are piggy-backing on the game-invites container here...
@@ -84,12 +87,14 @@ function showTreatyError(err){
     } else if(Ext.get('treaty-error')[0].innerHTML !== treatyErr) {
         Ext.get('treaty-error').update(treatyHtml);
     }
+    */
 }
 
 function showTreaties(data){
     'use strict';
     console.log(data);
     return;
+    /*
     Ext && Ext.get('game-invites') && Ext.get('game-invites').remove();
     // we are piggy-backing on the game-invites container here...
     Ext.DomHelper.append('body', {tag: 'ul', id: 'game-invites'});
@@ -108,9 +113,10 @@ function showTreaties(data){
         var treatyHtml = (t.partners.length === 1 ? '<i>PENDING:</i> ':'') + 'Treaty ' + id + ': ' +t.terms + '<hr>' + partnersWithColors.join(', ');
         Ext.DomHelper.append('game-invites', {tag: 'li', id: 'treaty-'+ id, html: treatyHtml});
     });
+    */
 }
 
-reqs = 0;
+var reqs = 0;
 function pollTreaties(){
     'use strict';
     // only want one outstanding request
@@ -120,6 +126,7 @@ function pollTreaties(){
         reqs--;
         if(err){
             console.log(err);
+            showTreatyError(err);
             return;
         }
         showTreaties(data);
@@ -152,7 +159,7 @@ function getQueue(){
 
 function sendDiceToHubot(player, attack, defend){
     $.ajax({
-        url: "https://hubot-gregcochard.rhcloud.com/hubot/pushdice",
+        url: 'https://hubot-gregcochard.rhcloud.com/hubot/pushdice',
         method: 'POST',
         success: function(){
             var q = getQueue();
@@ -170,15 +177,17 @@ function sendDiceToHubot(player, attack, defend){
         }
     });
 }
-hidden = false;
+//var hidden = false;
 $(document).ready(function(){
     'use strict';
+    /*
     var oldRemoveInvites = window.removeInvites;
     window.removeInvites = function(){
         if(Ext.get('game-invites')){
             Ext.DomQuery.select('[id^=invite-]').remove();
         }
     };
+    */
     
     var oldShowDice = playGame.showDice;
     playGame.showDice = function(att,att_color,def,def_color){
@@ -227,15 +236,17 @@ $(document).ready(function(){
         newPlayer = newPlayer.html();
         return newPlayer;
     }
-    (function injectChangeDetection(){
-        var oldShowNotification = PlayGame.showNotificationBanner;
-        PlayGame.showNotificationBanner = function(color, message){
+    setTimeout(function(){
+        var oldShowNotification = playGame.showNotificationBanner;
+        playGame.showNotificationBanner = function(color, message){
             switch(message){
-            'Turn finished.': pollPlayer(); break;
+            case 'Turn finished.':
+                pollPlayer();
+                break;
             }
             return oldShowNotification.apply(this,Array.prototype.slice.call(arguments));
         };
-    }());
+    },2000);
     function pollPlayer(){
         var newPlayer = getPlayer();
         if(!curPlayer){
