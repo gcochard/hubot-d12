@@ -3,7 +3,7 @@
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
 // @version      1.0.13
-// @description  calls hubot with the current player
+// @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
 // @match        http://www.dominating12.com//game/*
