@@ -395,7 +395,7 @@ module.exports = function(robot) {
     // FSM to start a game
     var fsmState = null;
     // defaults for game vars
-    var gameVars = {
+    var gbeGameVars = {
         // gameType: {16:'Gambit',17:'Dark Gambit',18:'Blind Gambit',19:'Spy Gambit'}
         gameType: 17
       , gameTitle: 'Untitled Game'
@@ -421,7 +421,7 @@ module.exports = function(robot) {
       }
     };
 
-    var startGame = function(msg){
+    var startGbeGame = function(msg){
         gameVars = gameVars || {};
         var args = util.inspect([gameVars],{depth:Infinity}).
             replace(/\n */g,'').
@@ -454,15 +454,107 @@ module.exports = function(robot) {
     };
 
     var emails = {
-        gregcochard: 'greg.cochard@viasat.com',
+        gregcochard: 'greg@gregcochard.com',
         ryanmilbourne: 'ryan.milbourne@viasat.com',
         kevinwren: 'kevin.wren@viasat.com',
         mattmacfreier: 'matt.macfreier@viasat.com',
         jonathanbratt: 'jonathan.bratt@viasat.com'
     };
 
-    var gameTypes = {standard:16,dark:17,blind:18,spy:19};
-    var states = {
+    var d12Users = {
+        gcochard:35533,
+        mmacfreier:35688,
+        ryanbmilbourne:35689,
+        jobratt:35690,
+        kwren:35692,
+        tanleach1001:37209
+    };
+
+    var d12GameTypes = {
+        deathmatch:1,
+        capitals:3,
+        domination:5
+    };
+
+    var d12CardTypes = {
+        increasing:1,
+        fixed:2,
+        none:3,
+        capped:4
+    };
+
+    var d12States = {
+        start_game: function(msg){
+            repl = true;
+            fsmState = 'game_type';
+            msg.reply('entering interactive mode, reply "hubot cancel" to cancel game creation');
+            msg.reply('Please reply with game type in the form "hubot game type <'+Object.keys(d12GameTypes).join('|')+'>"');
+        },
+        game_type: function(msg){
+            var gameType = (msg.match[1] || '').toLowerCase();
+            if(!d12GameTypes.hasOwnProperty(gameTypes)){
+                msg.reply('invalid game type! Please reply with "hubot game type <type>"');
+                return;
+            }
+            gameVars.gameType = d12GameTypes[gameType];
+            var initCapGameType = gameType.split('');
+            initCapGameType[0] = initCapGameType[0].toUpperCase();
+            gameType = initCapGameType.join('');
+            msg.reply('Set game type to '+gameType);
+            fsmState = 'card_type';
+            msg.reply('Please reply with card preferences in the form "hubot cards <'+Object.keys(d12CardTypes).join('|')+'>"');
+        },
+        card_type: function(msg){
+            var cardType = (msg.match[1] || '').toLowerCase();
+            if(!d12CardTypes.hasOwnProperty(cardType)){
+                msg.reply('invalid card preference! Please reply with "hubot cards <preference>"');
+                return;
+            }
+            gameVars.cardType = d12CardTypes[cardType];
+            if(gameVars.cardType === 4){
+                msg.reply('Set cards to capped');
+                fsmState = 'card_cap';
+                return msg.reply('Please reply with card cap in the form "hubot card cap <'+d12Caps.join('|')+'>"');
+            }
+            msg.reply('Set cards to '+cardType);
+            fsmState = 'map_select';
+            msg.reply('Please reply with map in the form "hubot choose map <name|id>", if you want a map preview, reply with "hubot map preview <name|id>"');
+        },
+        card_cap: function(msg){
+            var cardCap = +(msg.match[1] || '');
+            if(-1 === d12Caps.indexOf(cardCap)){
+                msg.reply('Invalid card cap! Please reply with "hubot card cap <number>"');
+                return;
+            }
+            msg.reply('Set card cap to '+cardCap);
+            fsmState = 'map_select';
+            msg.reply('Please reply with map in the form "hubot choose map <name|id>", if you want a map preview, reply with "hubot map preview <name|id>"');
+        },
+        map_select: function(msg){
+        },
+        player_count: function(msg){
+        },
+        turn_length: function(msg){
+        },
+        fortify_select: function(msg){
+        },
+        turn_order: function(msg){
+        },
+        dice_select: function(msg){
+        },
+        fog_of_war: function(msg){
+        },
+        teams: function(msg){
+        },
+        join_manner: function(msg){
+        },
+        colors: function(msg){
+            // green for greg
+        }
+    };
+
+    var gbeGameTypes = {standard:16,dark:17,blind:18,spy:19};
+    var gbeStates = {
         start_game: function(msg){
             repl = true;
             fsmState = 'game_type';
@@ -612,6 +704,7 @@ module.exports = function(robot) {
         }
     };
 
+    /*
     robot.respond(/start game$/i, states.start_game);
     robot.respond(/game type ((standard)|(dark)|(blind)|(spy))+/i, states.game_type);
     //-- handled below, proxies to states.turn_order robot.respond(/turn order (\d)+/i, states.turn_order);
@@ -623,6 +716,7 @@ module.exports = function(robot) {
     robot.respond(/player names ("[^"]*" ?)+/i, states.player_names);
     robot.respond(/commit/i, states.commit);
     robot.respond(/cancel/i, states.cancel);
+    */
 
     robot.respond(/(finish)|(end) game/i, function(msg) {
         robot.brain.data.currentGame = null;
@@ -697,6 +791,16 @@ module.exports = function(robot) {
         robot.logger.info('announcing game '+game+' turn');
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);
+        if(req.query.ended){
+            delete currPlayers[game];
+            robot.brain.set('currentPlayers',currPlayers);
+            if(!(/^@/.test(payload))){
+                payload = '@'+payload;
+            }
+            payload = '@channel: game ' + game + ' is over! ' + payload + ' has won!';
+            robot.brain.remove('treaties');
+            return robot.messageRoom(gameRoom,payload);
+        }
         if(currPlayers[game] !== payload){
             currPlayers[game] = payload;
             robot.brain.set('currentPlayers',currPlayers);
