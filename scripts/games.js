@@ -821,10 +821,12 @@ module.exports = function(robot) {
         var game = detectGame(req.get('referrer'));
         robot.logger.info('announcing game '+game+' deaths');
         var currDeaths = robot.brain.get('currentDeaths') || {};
-        robot.logger.info(currDeaths);
-        if(currDeaths[game].length !== payload.length){
-            var dead = diff(payload, currDeaths[game]);
-            currDeaths[game] = payload;
+        var gameDeaths = currDeaths[game] || [];
+        robot.logger.info(gameDeaths);
+        if(gameDeaths.length !== payload.length){
+            var dead = diff(payload, gameDeaths);
+            gameDeaths = payload;
+            currDeaths[game] = gameDeaths;
             robot.brain.set('currentDeaths',currDeaths);
             var plural = true;
             if(dead.length === 1){
