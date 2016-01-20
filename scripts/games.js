@@ -861,7 +861,8 @@ module.exports = function(robot) {
         robot.logger.info('announcing game '+game+' turn');
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);
-        if(req.query.ended){
+        // if the game has ended and it hasn't been reported yet...
+        if(req.query.ended && currPlayers[game]){
             var currDeaths = robot.brain.get('currDeaths') || {};
             delete currPlayers[game];
             robot.brain.set('currentPlayers',currPlayers);
