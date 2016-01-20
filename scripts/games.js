@@ -30,20 +30,11 @@ var path = require('path');
 var util = require('util');
 var diff = require('array-difference');
 var gameRoom = '#games';
-var hereMention = '@channel';
+var hereMention = '@channel:';
 var interval;
 
 module.exports = function(robot) {
 
-    var aliases = {
-        'greg': 'greg',
-        'ryan': 'rmilbourne',
-        'kevin': 'kevin',
-        'matt': 'mmacfreier',
-        'jonathan': 'jobratt',
-        'justin': 'hustin',
-        'suntan':'suntan'
-    };
     function formatMessage(username){
         var name = robot.brain.data.turnOrder.split(' ')[username];
         if(name){
@@ -125,7 +116,7 @@ module.exports = function(robot) {
             var gameId = obj.gameId;
             clearInterval(interval);
             robot.brain.data.currentGame = gameId;
-            return "Current game id set to "+gameId;
+            return 'Current game id set to '+gameId;
         }
 
     });
@@ -209,69 +200,35 @@ module.exports = function(robot) {
     }
 
     var d12Users = {
-        mmacfreier:'Matt',
-        kwren:'Kevin',
-        gcochard:'Greg',
-        justinb:'BassJustin',
-        ryanbmilbourne:'Ryan',
-        jobratt:'Jonathan'
+        mmacfreier:'matt',
+        kwren:'kevin',
+        gcochard:'greg',
+        justinb:'justin',
+        tanleach1001:'suntan',
+        ryanbmilbourne:'ryan',
+        jobratt:'jonathan'
     };
-    function checkD12(send,gameId,frominterval){
-        var nonce = Date.now();
-        var callback = 'callback';
-        if(frominterval){
-            callback = 'callbackInterval';
-        }
-        var currentGameUrl = 'http://dominating12.com/lib/ajax/game/play.php';
-        return request.post(currentGameUrl,{form:{
-            id:gameId,
-            view:1,
-            status:2,
-            troops:0,
-            territories:0,
-            time:0,
-            players:1,
-            cworth:0,
-            cards:1,
-            mapSize:1,
-            notLobby:1
-        }},function(err,res,body){
+    function checkD12(send,gameId){
+        var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
+        return request.get(currentGameUrl,function(err,res,body){
             if(err){
                 robot.logger.error(err.message);
                 return send('I couldn\'t find that info, sorry, '+err.message);
             }
             robot.logger.info(gameId);
-            //robot.logger.info(body);
-            var currPlayers = robot.brain.get('currentPlayers') || {};
-            var relevant = body.match(/updateGamePlayers\(([^;]+)\)/);
-            robot.logger.info(relevant);
-            relevant = relevant && relevant[1];
-            if(!relevant){
-                return send('I couldn\'t find that info, sorry, response: '+relevant);
+            robot.logger.info(body);
+            var playerList = body.playerList, players = [];
+            robot.logger.info(playerList);
+            // convert to real array
+            Object.keys(playerList).forEach(function(p){
+                players[p-1] = playerList[p];
+            });
+            if(body.winning_team){
+                var winner = players[body.winning_team-1];
+                var winnerName = d12Users[winner.username];
+                return cleanupGame(gameId, winnerName);
             }
-            try{
-                relevant = eval(relevant);
-                robot.logger.info(relevant);
-            } catch(e){
-                robot.logger.error(e.message);
-                return send('I couldn\'t find that info, sorry, '+e.message);
-            }
-            var message = '';
-            var newPlayer = relevant.filter(function(item){
-                return !!item[6];
-            })[0];
-            if(newPlayer.length){
-                newPlayer = newPlayer[1];
-            } else {
-                var winner = body.match(/winningTeam = (\d)/);
-                if(winner && winner.length){
-                    winner = winner[1];
-                }
-                var winnerName = d12Users[relevant[winner][1]];
-                delete currPlayers[gameId];
-                robot.brain.set('currentPlayers',currPlayers);
-                return robot.messageRoom(gameRoom, hereMention+' Game over! @'+winnerName+' won!');
-            }
+            /*
             newPlayer = d12Users[newPlayer];
             if(newPlayer){
                 var currPlayer = currPlayers[gameId] || '';
@@ -290,8 +247,27 @@ module.exports = function(robot) {
             } else {
                 robot.logger.error('message undefined');
             }
+            */
         });
     }
+
+    function cleanupGame(game,winner){
+        var players = robot.brain.get('currentPlayers') || {};
+        var treaties = robot.brain.get('treaties') || {};
+        var deaths = robot.brain.get('currentDeaths') || {};
+        delete players[game];
+        delete treaties[game];
+        delete deaths[game];
+        robot.brain.set('currentPlayers',players);
+        robot.brain.set('treaties',treaties);
+        robot.brain.set('currentDeaths',deaths);
+        if(!(/^@/.test(winner))){
+            winner = '@'+winner;
+        }
+        var payload = hereMention+' game ' + game + ' is over! ' + winner + ' has won!';
+        return robot.messageRoom(gameRoom,payload);
+    }
+
 
     // only start interval on startup if there's already a game going
     /* -- commenting this out for now
@@ -339,7 +315,7 @@ module.exports = function(robot) {
                     return msg.reply(['heads','tails'][array[0][0]]);
                 }
             }
-            return msg.reply("I couldn't find a coin to flip!");
+            return msg.reply('I couldn\'t find a coin to flip!');
         });
     });
 
@@ -373,26 +349,27 @@ module.exports = function(robot) {
 
     robot.respond(/open the (.*) doors/i, function(msg) {
         var doorType = msg.match[1];
-        if(doorType === "pod bay"){
-            msg.reply("I'm afraid I can't let you do that.");
+        if(doorType === 'pod bay'){
+            msg.reply('I\'m afraid I can\'t let you do that.');
         }
         else{
-            msg.reply("Opening "+doorType+" doors");
+            msg.reply('Opening '+doorType+' doors');
         }
     });
 
     robot.respond(/current game/i,function(msg) {
-        msg.reply("current game is "+robot.brain.data.currentGame);
+        msg.reply('current game is '+robot.brain.data.currentGame);
     });
 
     robot.respond(/start game (.*)/i, function(msg) {
         var gameId = msg.match[1];
         clearInterval(interval);
         robot.brain.data.currentGame = gameId;
-        msg.reply("Current game id set to "+gameId);
-        msg.reply("Please reply with turn order in the form 'JohnDoe JaneDoe MarkDankberg SteveJobs' using hipchat mention names");
+        msg.reply('Current game id set to '+gameId);
+        msg.reply('Please reply with turn order in the form \'JohnDoe JaneDoe MarkDankberg SteveJobs\' using hipchat mention names');
     });
 
+    /*eslint-disable*/
     var repl = false;
     // FSM to start a game
     var fsmState = null;
@@ -705,6 +682,7 @@ module.exports = function(robot) {
             msg.reply('Cancelled game creation. Please come again!');
         }
     };
+    /*eslint-enable*/
 
     /*
     robot.respond(/start game$/i, states.start_game);
@@ -729,7 +707,7 @@ module.exports = function(robot) {
 
     robot.respond(/who'?se? turn is it/i, function(msg) {
         if(!Object.keys(robot.brain.get('currentPlayers')||{}).length){
-            return msg.reply("I am not tracking any games!");
+            return msg.reply('I am not tracking any games!');
         }
         var match = msg.match[0].match(/in game (\d)+/);
         if(match && match[1]){
@@ -775,7 +753,9 @@ module.exports = function(robot) {
     robot.router.get('/hubot/treaties', function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('content-type','application/json');
-        var treaties = robot.brain.get('treaties');
+        var game = detectGame(req.get('referrer'));
+        var treaties = robot.brain.get('treaties') || {};
+        treaties = treaties[game] || {};
         res.send(JSON.stringify(treaties));
     });
 
@@ -863,19 +843,8 @@ module.exports = function(robot) {
         robot.logger.info(currPlayers);
         // if the game has ended and it hasn't been reported yet...
         if(req.query.ended && currPlayers[game]){
-            var currDeaths = robot.brain.get('currDeaths') || {};
-            delete currPlayers[game];
-            robot.brain.set('currentPlayers',currPlayers);
-            delete currDeaths[game];
-            robot.brain.set('currentDeaths',currDeaths);
-            if(!(/^@/.test(payload))){
-                payload = '@'+payload;
-            }
-            payload = '@channel: game ' + game + ' is over! ' + payload + ' has won!';
-            robot.brain.remove('treaties');
-            return robot.messageRoom(gameRoom,payload);
-        }
-        if(currPlayers[game] !== payload){
+            return cleanupGame(game,req.query.user);
+        } else if(currPlayers[game] !== payload){
             currPlayers[game] = payload;
             robot.brain.set('currentPlayers',currPlayers);
             if(!(/^@/.test(payload))){
@@ -895,7 +864,6 @@ module.exports = function(robot) {
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot saved statistics';
-        var player = req.body.player;
         var game = detectGame(req.get('referrer'));
         var stats = robot.brain.get('stats') || {};
         stats[game] = stats[game] || [];
@@ -918,9 +886,11 @@ module.exports = function(robot) {
     robot.router.get('/hubot/d12.inject.user.js',serveScript.bind(null,'d12.inject.user.js'));
 
     robot.respond(/turn order( [^ ]+){2,6}/i, function(msg) {
+        /*
         if(repl && fsmState === 'turn_order' && !robot.brain.data.currentGame){
             return states.turn_order(msg);
         }
+        */
         var order = msg.match[0].replace(/^.*turn order /,'').split(' ');
         order = order.map(function(s){
             if(s.indexOf('@')===0){
@@ -949,9 +919,9 @@ module.exports = function(robot) {
     robot.hear(/tahiti/i, function(msg){
         if(robot.brain.data.tahitis < 10){
             robot.brain.data.tahitis++;
-            msg.send("It's a magical place.");
+            msg.send('It\'s a magical place.');
             if(robot.brain.data.tahitis === 10) {
-                msg.send("-- I keep saying that!");
+                msg.send('-- I keep saying that!');
             }
         }
     });
