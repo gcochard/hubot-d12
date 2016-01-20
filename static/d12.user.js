@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.17
+// @version      1.0.18
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -223,11 +223,13 @@ $(document).ready(function(){
     var currDead = [];
     var oldUpdatePlayers = playGame.updatePlayerlist;
     playGame.updatePlayerlist = function(players){
-        var newDead = Array.prototype.filter.call(players,function(p){ return !p.alive; });
+        var newDead = $.extend({}, players);
+        newDead.length = Object.keys(players).length;
+        newDead = Array.prototype.filter.call(newDead,function(p){ return !p.alive; });
         if(currDead.length !== newDead.length){
             currDead = newDead;
         }
-        reportDeaths(Array.prototype.slice.call(currDead));
+        reportDeaths(currDead);
         return oldUpdatePlayers.call(this,players);
     };
 
