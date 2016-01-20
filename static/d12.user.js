@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.15
+// @version      1.0.16
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -54,6 +54,22 @@ function signalToHubot(player,ended){
     },100);
 }
 
+function reportDeaths(deaths){
+    $.ajax({
+        url: 'https://hubot-gregcochard.rhcloud.com/hubot/pushdeath',
+        method: 'POST',
+        success: function(){
+            console.log(arguments);
+        },
+        failure: function(){
+            console.error(arguments);
+        },
+        data: {
+            deaths: deaths
+        }
+    });
+}
+
 function fetchTreaties(cb){
     'use strict';
     var called = false;
@@ -63,7 +79,7 @@ function fetchTreaties(cb){
         success: function(data){
             if(called){ return; }
             called = true;
-            cb(null, data.responseText);
+            cb(null, data);
         },
         failure: function(e){
             if(called) { return; }
@@ -203,6 +219,16 @@ $(document).ready(function(){
             clearInterval(treatyPollInterval);
         }
         return oldRunUpdates.call(this,result);
+    };
+    var currDead = [];
+    var oldUpdatePlayers = playGame.updatePlayerList;
+    playGame.updatePlayerList = function(players){
+        var newDead = Array.prototype.filter.call(players,function(p){ return !p.alive; });
+        if(currDead.length !== newDead.length){
+            currDead = newDead;
+        }
+        reportDeaths(Array.prototype.slice.call(currDead));
+        return oldUpdatePlayers.call(this,players);
     };
 
 /*

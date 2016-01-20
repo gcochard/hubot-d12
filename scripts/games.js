@@ -4,6 +4,7 @@
 // Dependencies:
 //   lodash
 //   request
+//   array-difference
 //
 // Commands:
 //   hubot open the <door type> doors - Opens doors
@@ -21,12 +22,13 @@
 //   hubot unalias <name> - forgets alias
 //   hubot show aliases - lists known aliases for a user
 'use strict';
+/*eslint-env node*/
 var _ = require('lodash');
 var request = require('request');
 var vm = require('vm');
 var path = require('path');
 var util = require('util');
-var url = require('url');
+var diff = require('array-difference');
 var gameRoom = '#games';
 var hereMention = '@channel';
 var interval;
@@ -776,6 +778,70 @@ module.exports = function(robot) {
         var treaties = robot.brain.get('treaties');
         res.send(JSON.stringify(treaties));
     });
+
+    function rand(min, max){
+        return Math.random() * (max - min) + min;
+    }
+
+    var deathReasons = [{msg:'',weight:10},{msg:'of dysentery',weight:2},{msg:'of dissing terry',weight:1}];
+    var totalWeight = deathReasons.reduce(function(prev, cur){
+        return prev.weight + cur.weight;
+    },0);
+
+    function getDeathReason(){
+        var random = rand(0,totalWeight);
+        var weightSum = 0;
+        var reason = '';
+
+        for(var i=0, ii=deathReasons.length; i<ii; i++){
+            weightSum += deathReasons[i].weight;
+            if(random <= weightSum){
+                reason = deathReasons[i].msg;
+                break;
+            }
+        }
+        if(reason.length > 0){
+            reason = ' ' + reason;
+        }
+        return reason;
+    }
+
+    robot.router.options('/hubot/pushdeath',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.post('/hubot/pushdeath',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce deaths now';
+        res.send(response);
+        var payload = req.body.deaths;
+        var game = detectGame(req.get('referrer'));
+        robot.logger.info('announcing game '+game+' deaths');
+        var currDeaths = robot.brain.get('currentDeaths') || {};
+        robot.logger.info(currDeaths);
+        if(currDeaths[game].length !== payload.length){
+            var dead = diff(payload, currDeaths[game]);
+            currDeaths[game] = payload;
+            robot.brain.set('currentDeaths',currDeaths);
+            var plural = true;
+            if(dead.length === 1){
+                dead = dead[0];
+                plural = false;
+            } else if(dead.length === 2){
+                dead = dead.join(' and ');
+            } else {
+                dead[dead.length-1] = 'and ' + dead[dead.length-1];
+                dead = dead.join(', ');
+            }
+            payload = '@channel: ' + dead;
+            payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason()+' in game ' + game + ', http://dominating12.com/game/' + game;
+            robot.messageRoom(gameRoom,payload);
+        }
+    });
+
     robot.router.options('/hubot/pushturn',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','GET, OPTIONS');
@@ -794,8 +860,11 @@ module.exports = function(robot) {
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);
         if(req.query.ended){
+            var currDeaths = robot.brain.get('currDeaths') || {};
             delete currPlayers[game];
             robot.brain.set('currentPlayers',currPlayers);
+            delete currDeaths[game];
+            robot.brain.set('currentDeaths',currDeaths);
             if(!(/^@/.test(payload))){
                 payload = '@'+payload;
             }
