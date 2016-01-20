@@ -2,11 +2,11 @@
 //   keeper of games treaties
 //
 // Dependencies:
-//   underscore
+//   lodash
 //   shortid
 //
 // Commands:
-//   hubot treaty me <terms> <partner> - Proposes a treaty between the player and a partner
+//   hubot treaty me <game> <terms> <partner> - Proposes a treaty of <terms> between the requestor and <partner> in <game>
 //   hubot treaty list - Lists the current treaties in place
 //   hubot treaty add <id> <partner> - Invite a new partner to the treaty. You must be a member of the treaty.
 //   hubot ratify me <id> - Agree to join treaty belonging to the ID
@@ -15,7 +15,7 @@
 
 'use strict';
 
-var _ = require('underscore');
+var _ = require('lodash');
 var util = require('util');
 var shortid = require('shortid');
 var gameRoom = '#games';
@@ -156,8 +156,9 @@ module.exports = function(robot){
         });
     });
 
-    robot.respond(/treaty me "(.*)"( [^ ]+){1,5}/i, function(msg){
-        var terms = msg.match[1]
+    robot.respond(/treaty me (\d+) "(.*)"( [^ ]+){1,5}/i, function(msg){
+        var game = msg.match[1]
+          , terms = msg.match[2]
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
           ;
 
@@ -172,6 +173,7 @@ module.exports = function(robot){
         treaties[id] = {
             partners: [requestor],
             pending: [],
+            game: game,
             terms: terms
         };
         robot.brain.set('treaties', treaties);

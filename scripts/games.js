@@ -255,8 +255,12 @@ module.exports = function(robot) {
         var players = robot.brain.get('currentPlayers') || {};
         var treaties = robot.brain.get('treaties') || {};
         var deaths = robot.brain.get('currentDeaths') || {};
+        Object.keys(treaties).forEach(function(id){
+            if(treaties[id].game === game){
+                delete treaties[id];
+            }
+        });
         delete players[game];
-        delete treaties[game];
         delete deaths[game];
         robot.brain.set('currentPlayers',players);
         robot.brain.set('treaties',treaties);
@@ -755,7 +759,7 @@ module.exports = function(robot) {
         res.header('content-type','application/json');
         var game = detectGame(req.get('referrer'));
         var treaties = robot.brain.get('treaties') || {};
-        treaties = treaties[game] || {};
+        treaties = _.filter(treaties,{game:game});
         res.send(JSON.stringify(treaties));
     });
 
