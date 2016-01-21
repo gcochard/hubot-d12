@@ -36,7 +36,6 @@ s.src = 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js';
 s.type = 'text/javascript';
 s.async = true;
 s.onload = loaded;
-s.onError = loaded;
 
 function loaded(){
     console.log('injected!');
