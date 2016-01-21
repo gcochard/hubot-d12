@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.26
+// @version      1.0.27
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -120,6 +120,10 @@ function loaded(){
     // inject our treaty container
     var $treaties = $('#notifications').clone().attr({id:'treaties',class:'treaties notifications'});
     $('#notifications').parent().append($treaties);
+    $('ul.nav-list.pull-left').append('<li id="toggle-treaties">Toggle Treaties</li>');
+    $('#toggle-treaties').on('click',function(){
+        $treaties.toggle();
+    });
 
     function showTreaties(data){
         'use strict';
