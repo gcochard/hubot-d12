@@ -39,11 +39,12 @@ module.exports = function(robot){
             return cb(new Error('No active treaties'));
         }
 
-        var first = true;
         var outputString = '```\n';
         var output = _.map(treaties, function(val,key){
+            var first = true;
             var outputString = 'Game '+key+': \n';
             var outputString2 = _.map(val, function(val){
+                var outputString3 = '';
                 if(val.partners.length < 2 && !incPending){
                     return;
                 }
@@ -56,16 +57,16 @@ module.exports = function(robot){
                     pendingString+=(name+' ');
                 });
                 if(first){
-                    outputString += '===========================\n';
+                    outputString3 += '===========================\n';
                     first = false;
                 }
-                outputString += 'Treaty ID: '+val.id+ '\n';
-                outputString += 'Participating Parties: '+partnerString+'\n';
+                outputString3 += 'Treaty ID: '+val.id+ '\n';
+                outputString3 += 'Participating Parties: '+partnerString+'\n';
                 if(incPending){
-                    outputString += 'Pending Parties: '+pendingString+'\n';
+                    outputString3 += 'Pending Parties: '+pendingString+'\n';
                 }
-                outputString += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
-                return outputString;
+                outputString3 += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
+                return outputString3;
             }).join('');
             if(outputString2){
                 return outputString + outputString2;
