@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.23
+// @version      1.0.24
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -131,22 +131,12 @@ function loaded(){
                 return text;
             });
             // build out the treaty html
-            var treatyHtml = (t.partners.length === 1 ? '<i>PENDING:</i> ':'') + 'Treaty ' + id + ': ' +t.terms + '<hr>' + partnersWithColors.join(', ');
+            var treatyHtml = (t.partners.length === 1 ? '<i>PENDING:</i> ':'') + 'Treaty ' + t.id + ': ' +t.terms + '<hr>' + partnersWithColors.join(', ');
             if(!$treaties.find('#treaty-'+id).length){
-                $treaties.append($(document.createElement('li')).attr({tag: 'li', class: 'treaty', id: 'treaty-'+ id}).html( treatyHtml));
+                $treaties.append($(document.createElement('li')).attr({tag: 'li', class: 'treaty', id: 'treaty-'+ t.id}).html(treatyHtml));
             }
         });
         return;
-        /*
-        Ext && Ext.get('game-invites') && Ext.get('game-invites').remove();
-        // we are piggy-backing on the game-invites container here...
-        Ext.DomHelper.append('body', {tag: 'ul', id: 'game-invites'});
-        if(hidden){
-            Ext.get('game-invites').toggle();
-        }
-
-        Ext.get('treaty-error') && Ext.get('treaty-error').remove();
-        */
     }
 
     var reqs = 0;

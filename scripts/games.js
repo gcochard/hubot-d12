@@ -759,8 +759,12 @@ module.exports = function(robot) {
         res.header('content-type','application/json');
         var game = detectGame(req.get('referrer'));
         var treaties = robot.brain.get('treaties') || {};
+        treaties = _.map(treaties,function(treaty,id){
+            treaty.id = id;
+            return treaty;
+        });
         treaties = _.filter(treaties,{game:game});
-        res.send(JSON.stringify(treaties));
+        return res.json(treaties);
     });
 
     function rand(min, max){

@@ -41,7 +41,8 @@ module.exports = function(robot){
 
         var first = true;
         var outputString = '```\n';
-        _.each(treaties, function(val, key){
+        var output = _.map(treaties, function(val, key){
+            var outputString = '';
             if(val.partners.length < 2 && !incPending){
                 return;
             }
@@ -63,7 +64,12 @@ module.exports = function(robot){
                 outputString += 'Pending Parties: '+pendingString+'\n';
             }
             outputString += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
+            return outputString;
         });
+        if(!output.join('').length){
+            return cb(new Error('No active treaties'));
+        }
+        outputString += output.join('');
         outputString += '```';
         return cb(null, outputString);
     };
