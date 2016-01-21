@@ -34,37 +34,43 @@ module.exports = function(robot){
      * Builds a formatted string listing the current treaties
      */
     var formatTreaties = function(incPending,cb){
-        var treaties = robot.brain.get('treaties') || {};
+        var treaties = _.groupBy(robot.brain.get('treaties') || {}, 'game');
         if(!Object.keys(treaties).length){
             return cb(new Error('No active treaties'));
         }
 
         var first = true;
         var outputString = '```\n';
-        var output = _.map(treaties, function(val, key){
-            var outputString = '';
-            if(val.partners.length < 2 && !incPending){
-                return;
+        var output = _.map(treaties, function(val){
+            var outputString = 'Game '+val.game+': \n';
+            var outputString2 = _.map(val, function(val, key){
+                if(val.partners.length < 2 && !incPending){
+                    return;
+                }
+                var partnerString = '';
+                _.each(val.partners, function(name){
+                    partnerString+=(name+' ');
+                });
+                var pendingString = '';
+                _.each(val.pending, function(name){
+                    pendingString+=(name+' ');
+                });
+                if(first){
+                    outputString += '===========================\n';
+                    first = false;
+                }
+                outputString += 'Treaty ID: '+key+ '\n';
+                outputString += 'Participating Parties: '+partnerString+'\n';
+                if(incPending){
+                    outputString += 'Pending Parties: '+pendingString+'\n';
+                }
+                outputString += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
+                return outputString;
+            }).join('');
+            if(outputString2){
+                return outputString + outputString2;
             }
-            var partnerString = '';
-            _.each(val.partners, function(name){
-                partnerString+=(name+' ');
-            });
-            var pendingString = '';
-            _.each(val.pending, function(name){
-                pendingString+=(name+' ');
-            });
-            if(first){
-                outputString += '===========================\n';
-                first = false;
-            }
-            outputString += 'Treaty ID: '+key+ '\n';
-            outputString += 'Participating Parties: '+partnerString+'\n';
-            if(incPending){
-                outputString += 'Pending Parties: '+pendingString+'\n';
-            }
-            outputString += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
-            return outputString;
+            return '';
         });
         if(!output.join('').length){
             return cb(new Error('No active treaties'));
