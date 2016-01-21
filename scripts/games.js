@@ -228,6 +228,10 @@ module.exports = function(robot) {
                 var winnerName = d12Users[winner.username];
                 return cleanupGame(gameId, winnerName);
             }
+            var currPlayers = robot.brain.get('currentPlayers') || {};
+            var currPlayer = currPlayers[gameId];
+            var message = 'last I heard, it was '+currPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
+            return send(message);
             /*
             newPlayer = d12Users[newPlayer];
             if(newPlayer){
@@ -237,7 +241,6 @@ module.exports = function(robot) {
                     currPlayers[gameId] = newPlayer;
                     isNew = true;
                 }
-                message += 'it is '+(isNew?'@':'')+newPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
                 robot.brain.set('currentPlayers',currPlayers);
             }
             if(message){
