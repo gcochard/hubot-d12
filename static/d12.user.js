@@ -116,7 +116,7 @@ s.onLoad = function(){
     }
 
     // inject our treaty container
-    var $treaties = $('#notifications').clone().attr({id:'treaties',class:'treaties'});
+    var $treaties = $('#notifications').clone().attr({id:'treaties',class:'treaties notifications'});
     $('#notifications').parent().append($treaties);
 
     function showTreaties(data){
