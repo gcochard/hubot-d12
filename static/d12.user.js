@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.24
+// @version      1.0.25
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -11,7 +11,7 @@
 // @match        https://www.dominating12.com//game/*
 // @grant        none
 // ==/UserScript==
-/*global $: false, playGame: true*/
+/*global $: false, playGame: true, _: false*/
 /*eslint-env browser*/
 /*eslint no-console: 0*/
 var users = {
@@ -124,17 +124,29 @@ function loaded(){
     function showTreaties(data){
         'use strict';
         //console.log(data);
+        var newTreatyIds = [];
+        var oldTreatyIds = $('#treaties').find('li').map(function(i,t){
+            return $(t).attr('id');
+        });
         Object.keys(data).forEach(function(id){
             var t = data[id];
             var partnersWithColors = t.partners.map(function(p){
                 var text = '<b style="color:'+playerColors[users[p.toLowerCase()]]+';">'+p+'</b>';
                 return text;
             });
+            newTreatyIds.push('#treaty-'+t.id);
             // build out the treaty html
             var treatyHtml = (t.partners.length === 1 ? '<i>PENDING:</i> ':'') + 'Treaty ' + t.id + ': ' +t.terms + '<hr>' + partnersWithColors.join(', ');
-            if(!$treaties.find('#treaty-'+id).length){
+            if(!$treaties.find('#treaty-'+t.id).length){
                 $treaties.append($(document.createElement('li')).attr({tag: 'li', class: 'treaty', id: 'treaty-'+ t.id}).html(treatyHtml));
             }
+        });
+        var expiredTreaties = _.difference(oldTreatyIds,newTreatyIds);
+        expiredTreaties.forEach(function(id){
+            var $el = $('#'+id);
+            $el.fadeOut(function(){
+                $el.remove();
+            });
         });
         return;
     }
