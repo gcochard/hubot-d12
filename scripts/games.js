@@ -217,7 +217,14 @@ module.exports = function(robot) {
             }
             robot.logger.info(gameId);
             robot.logger.info(body);
-            var playerList = body.playerList, players = [];
+            if(typeof body === 'string'){
+                try {
+                    body = JSON.parse(body);
+                } catch(e){
+                    body = {};
+                }
+            }
+            var playerList = body.playerList || {}, players = [];
             robot.logger.info(playerList);
             // convert to real array
             Object.keys(playerList).forEach(function(p){
