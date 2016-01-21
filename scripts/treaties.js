@@ -41,9 +41,9 @@ module.exports = function(robot){
 
         var first = true;
         var outputString = '```\n';
-        var output = _.map(treaties, function(val){
-            var outputString = 'Game '+val.game+': \n';
-            var outputString2 = _.map(val, function(val, key){
+        var output = _.map(treaties, function(val,key){
+            var outputString = 'Game '+key+': \n';
+            var outputString2 = _.map(val, function(val){
                 if(val.partners.length < 2 && !incPending){
                     return;
                 }
@@ -59,7 +59,7 @@ module.exports = function(robot){
                     outputString += '===========================\n';
                     first = false;
                 }
-                outputString += 'Treaty ID: '+key+ '\n';
+                outputString += 'Treaty ID: '+val.id+ '\n';
                 outputString += 'Participating Parties: '+partnerString+'\n';
                 if(incPending){
                     outputString += 'Pending Parties: '+pendingString+'\n';

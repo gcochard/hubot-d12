@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.25
+// @version      1.0.26
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -134,11 +134,14 @@ function loaded(){
                 var text = '<b style="color:'+playerColors[users[p.toLowerCase()]]+';">'+p+'</b>';
                 return text;
             });
-            newTreatyIds.push('#treaty-'+t.id);
+            newTreatyIds.push('treaty-'+t.id);
             // build out the treaty html
             var treatyHtml = (t.partners.length === 1 ? '<i>PENDING:</i> ':'') + 'Treaty ' + t.id + ': ' +t.terms + '<hr>' + partnersWithColors.join(', ');
+            // if it doesn't exist, append it, otherwise update it
             if(!$treaties.find('#treaty-'+t.id).length){
                 $treaties.append($(document.createElement('li')).attr({tag: 'li', class: 'treaty', id: 'treaty-'+ t.id}).html(treatyHtml));
+            } else {
+                $('#treaty-'+t.id).html(treatyHtml);
             }
         });
         var expiredTreaties = _.difference(oldTreatyIds,newTreatyIds);
