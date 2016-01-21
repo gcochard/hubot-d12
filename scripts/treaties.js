@@ -92,10 +92,12 @@ module.exports = function(robot){
 
     var partnerStates = {
         propose: function(potentialPartner, treatyId, cb){
-            var treaties = robot.brain.get('treaties') || {};
             if(!_.contains(players, potentialPartner)){
                 return cb(potentialPartner+' is not one of my players!');
             }
+            robot.logger.log('Fetching treaties...');
+            var treaties = robot.brain.get('treaties') || {};
+            robot.logger.log('treaties: %j',treaties);
             if(!treaties[treatyId]){
                 return cb('I couldn\'t find that treaty!');
             }
@@ -182,6 +184,7 @@ module.exports = function(robot){
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
           ;
 
+        robot.logger.info('Game %d, terms: %s, partners: %j', game, terms, msg.match.slice(2));
         if(!_.contains(players, requestor)){
             msg.reply('I can\'t do that. You\'re not one of my players!'); 
             return msg.reply('You are '+requestor+' and my players are '+players.join(', ')); 
@@ -189,6 +192,8 @@ module.exports = function(robot){
 
         var id = shortid.generate();
         var treaties = robot.brain.get('treaties') || {};
+
+        robot.logger.info('id: %s', id);
 
         treaties[id] = {
             partners: [requestor],
@@ -207,8 +212,12 @@ module.exports = function(robot){
         });
         partners = _.without(partners, '');
 
+        robot.logger.info('partners: %s', partners.join(', '));
+
         _.each(partners, function(partner){
+            robot.logger.info('proposing: %s', partner);
             partnerStates.propose(partner, id, function(err){
+                robot.logger.info('err? %j', err);
                 if(err){
                     return msg.reply(err);
                 }
