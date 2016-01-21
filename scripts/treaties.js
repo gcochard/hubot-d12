@@ -13,10 +13,10 @@
 //   hubot decline me <id> - Decline to join the treaty belonging to the ID
 //   hubot untreaty me <id> - Dissolves treaty belonging to the ID
 
+/*eslint-env node*/
 'use strict';
 
 var _ = require('lodash');
-var util = require('util');
 var shortid = require('shortid');
 var gameRoom = '#games';
 var players = [
@@ -33,7 +33,7 @@ module.exports = function(robot){
     /**
      * Builds a formatted string listing the current treaties
      */
-    var formatTreaties = function(cb){
+    var formatTreaties = function(incPending,cb){
         var treaties = robot.brain.get('treaties') || {};
         if(!Object.keys(treaties).length){
             return cb(new Error('No active treaties'));
@@ -42,27 +42,34 @@ module.exports = function(robot){
         var first = true;
         var outputString = '```\n';
         _.each(treaties, function(val, key){
-            if(val.partners.length < 2){
+            if(val.partners.length < 2 && !incPending){
                 return;
             }
             var partnerString = '';
             _.each(val.partners, function(name){
                 partnerString+=(name+' ');
             });
+            var pendingString = '';
+            _.each(val.pending, function(name){
+                pendingString+=(name+' ');
+            });
             if(first){
                 outputString += '===========================\n';
                 first = false;
             }
             outputString += 'Treaty ID: '+key+ '\n';
-            outputString += 'Participating Parties: '+partnerString+'\n'
+            outputString += 'Participating Parties: '+partnerString+'\n';
+            if(incPending){
+                outputString += 'Pending Parties: '+pendingString+'\n';
+            }
             outputString += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
         });
         outputString += '```';
         return cb(null, outputString);
     };
 
-    robot.respond(/treaty lisz?t/i, function(msg){
-        formatTreaties(function(err, treaties){
+    robot.respond(/treaty lisz?t( pending)/i, function(msg){
+        formatTreaties(msg.match.length>1,function(err, treaties){
             if(err){
                 return msg.send(err);
             }
@@ -74,17 +81,17 @@ module.exports = function(robot){
         propose: function(potentialPartner, treatyId, cb){
             var treaties = robot.brain.get('treaties') || {};
             if(!_.contains(players, potentialPartner)){
-                return cb('@'+potentialPartner+' is not one of my players!');
+                return cb(potentialPartner+' is not one of my players!');
             }
             if(!treaties[treatyId]){
                 return cb('I couldn\'t find that treaty!');
             }
             if(_.contains(treaties[treatyId].partners, potentialPartner)){
-                return cb('@'+potentialPartner+' is already party to that treaty!');
+                return cb(potentialPartner+' is already party to that treaty!');
             }
             treaties[treatyId].pending = treaties[treatyId].pending || [];
             if(_.contains(treaties[treatyId].pending, potentialPartner)){
-               return cb('@'+potentialPartner+' was already invited!');
+                return cb(potentialPartner+' was already invited!');
             }
             treaties[treatyId].pending.push(potentialPartner);
             robot.brain.set('treaties', treaties);
@@ -178,7 +185,7 @@ module.exports = function(robot){
         };
         robot.brain.set('treaties', treaties);
 
-        var partners = msg.match[0].replace(/^.*treaty me "(.*)"/,'').split(' ');
+        var partners = msg.match[0].replace(/^.*treaty me \d+ "(.*)"/,'').split(' ');
         partners = partners.map(function(s){
             if(s.indexOf('@') === 0){
                 return s.slice(1);
