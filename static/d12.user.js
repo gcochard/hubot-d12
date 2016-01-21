@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.22
+// @version      1.0.23
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -14,7 +14,6 @@
 /*global $: false, playGame: true*/
 /*eslint-env browser*/
 /*eslint no-console: 0*/
-console.log('injected!');
 var users = {
     gcochard: 'greg'
     , greg: 'gcochard'
@@ -36,7 +35,11 @@ s.id = 'lodash';
 s.src = 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js';
 s.type = 'text/javascript';
 s.async = true;
-s.onLoad = function(){
+s.onload = loaded;
+s.onError = loaded;
+
+function loaded(){
+    console.log('injected!');
     s.onLoad = null;
 
     function signalToHubot(player,ended){
