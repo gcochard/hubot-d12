@@ -781,7 +781,7 @@ module.exports = function(robot) {
         return Math.random() * (max - min) + min;
     }
 
-    var deathReasons = [{msg:'',weight:10},{msg:'of dysentery',weight:2},{msg:'of dissing terry',weight:1}];
+    var deathReasons = [{msg:'',weight:10},{msg:'from a stray bullet',weight:3},{msg:'due to bad life choices',weight:3},{msg:'of dysentery',weight:2},{msg:'of dissing terry',weight:1}];
     var totalWeight = deathReasons.reduce(function(prev, cur){
         return prev.weight + cur.weight;
     },0);
@@ -826,6 +826,9 @@ module.exports = function(robot) {
             gameDeaths = payload;
             currDeaths[game] = gameDeaths;
             robot.brain.set('currentDeaths',currDeaths);
+            dead.forEach(function(p){
+                robot.emit('death',{ user: p, game: game});
+            });
             var plural = true;
             if(dead.length === 1){
                 dead = dead[0];

@@ -167,9 +167,32 @@ module.exports = function(robot){
             robot.brain.set('treaties', treaties);
         }
     };
-
     robot.respond(/ratify me ([a-zA-Z_\-0-9]+)/i, partnerStates.ratify);
     robot.respond(/decline me ([a-zA-Z_\-0-9]+)/i, partnerStates.decline);
+
+    robot.on('death',function(data){
+        var treaties = robot.brain.get('treaties');
+        var game = data.game;
+        var user = data.user;
+        var msg = '';
+        treaties = _.filter(treaties,{game:game});
+        _.each(treaties,function(treaty){
+            treaty.partners = _.without(treaty.partners, user);
+            if(treaty.partners.length + treaty.pending.length <= 2){
+                msg = partnerList + ': '+user+' has died in treaty '+treaty.id+', dissolving as there are less than 2 living parties left!';
+                robot.messageRoom(gameRoom, msg);
+                delete treaties[treaty.ie];
+                return robot.brain.set('treaties',treaties);
+            }
+            var partnerList = treaty.partners.map(function(user){
+                return '@'+user;
+            }).join(', ');
+            treaty.pending.concat(treaty.partners);
+            treaty.partners = [];
+            msg = partnerList + ': since '+user+' has died in treaty '+treaty.id+', would you like to re-ratify or leave? Please respond with "'+robot.name+' ratify|decline me '+treaty.id+'"';
+            robot.messageRoom(gameRoom, msg);
+        });
+    });
 
     robot.respond(/split me "["“](.*)["”]( [^ ]+){2,6}/i, function(msg){
         var order = msg.match[0].replace(/^.*split me ["“](.*)["”]/,'').split(' ');
