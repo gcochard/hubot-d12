@@ -67,13 +67,16 @@ module.exports = function(robot){
                     outputString3 += 'Pending Parties: '+pendingString+'\n';
                 }
                 outputString3 += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
+                robot.logger.log('intermediate string: %s',outputString3);
                 return outputString3;
             }).join('');
+            robot.logger.log('intermediate string: %s',outputString2);
             if(outputString2){
                 return outputString + outputString2;
             }
             return '';
         });
+        robot.logger.log('intermediate string: %s',output);
         if(!output.join('').length){
             return cb(new Error('No active treaties'));
         }
@@ -83,6 +86,7 @@ module.exports = function(robot){
     };
 
     robot.respond(/treaty lisz?t( pending)/i, function(msg){
+        robot.logger.log('heard treaty list');
         formatTreaties(msg.match.length>1,function(err, treaties){
             if(err){
                 return msg.send(err);
