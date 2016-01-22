@@ -332,4 +332,5 @@ module.exports = function(robot){
         return msg.reply('@channel Treaty '+id+' has been dissolved!');
     });
 
+    robot.logger.log('treaties loaded');
 };
