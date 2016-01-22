@@ -18,6 +18,7 @@
 
 var _ = require('lodash');
 var shortid = require('shortid');
+var util = require('util');
 var gameRoom = '#games';
 var players = [
                 'mmacfreier',
@@ -179,6 +180,12 @@ module.exports = function(robot){
     });
 
     robot.respond(/treaty me (\d+) "(.*)"( [^ ]+){1,5}/i, function(msg){
+        robot.logger.log('heard treaty me, message: %j',util.inspect(msg));
+        robot.logger.log('heard treaty me, envelope: %j',util.inspect(msg.envelope));
+        robot.logger.log('heard treaty me, user:  %j',util.inspect(msg.envelope.user));
+        robot.logger.log('heard treaty me, id %j',util.inspect(msg.envelope.user.id));
+        robot.logger.log('heard treaty me, userForId %j',util.inspect(robot.brain.userForId(msg.envelope.user.id)));
+        robot.logger.log('heard treaty me, userForId.name %j',util.inspect(robot.brain.userForId(msg.envelope.user.id).name));
         var game = msg.match[1]
           , terms = msg.match[2]
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
