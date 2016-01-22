@@ -85,7 +85,7 @@ module.exports = function(robot){
         return cb(null, outputString);
     };
 
-    robot.respond(/treaty lisz?t( pending)/i, function(msg){
+    robot.respond(/treaty lisz?t( pending)?/i, function(msg){
         robot.logger.info('heard treaty list');
         formatTreaties(msg.match.length>1,function(err, treaties){
             if(err){
