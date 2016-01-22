@@ -67,16 +67,13 @@ module.exports = function(robot){
                     outputString3 += 'Pending Parties: '+pendingString+'\n';
                 }
                 outputString3 += 'Treaty Terms: '+val.terms+'\n===========================\n'; 
-                robot.logger.info('intermediate string: %s',outputString3);
                 return outputString3;
             }).join('');
-            robot.logger.info('intermediate string: %s',outputString2);
             if(outputString2){
                 return outputString + outputString2;
             }
             return '';
         });
-        robot.logger.info('intermediate string: %s',output);
         if(!output.join('').length){
             return cb(new Error('No active treaties'));
         }
@@ -86,7 +83,6 @@ module.exports = function(robot){
     };
 
     robot.respond(/treaty lisz?t( pending)?/i, function(msg){
-        robot.logger.info('heard treaty list');
         formatTreaties(msg.match.length>1,function(err, treaties){
             if(err){
                 return msg.send(err);
@@ -102,7 +98,6 @@ module.exports = function(robot){
             }
             robot.logger.info('Fetching treaties...');
             var treaties = robot.brain.get('treaties') || {};
-            robot.logger.info('treaties: %j',treaties);
             if(!treaties[treatyId]){
                 return cb('I couldn\'t find that treaty!');
             }
@@ -176,26 +171,19 @@ module.exports = function(robot){
     robot.respond(/ratify me ([a-zA-Z_\-0-9]+)/i, partnerStates.ratify);
     robot.respond(/decline me ([a-zA-Z_\-0-9]+)/i, partnerStates.decline);
 
-    robot.respond(/split me "(.*)"( [^ ]+){2,6}/i, function(msg){
-        var order = msg.match[0].replace(/^.*split me "(.*)"/,'').split(' ');
+    robot.respond(/split me "["“](.*)["”]( [^ ]+){2,6}/i, function(msg){
+        var order = msg.match[0].replace(/^.*split me ["“](.*)["”]/,'').split(' ');
         _.each(order, function(name){
             msg.send(name);
         });
     });
 
-    robot.respond(/treaty me (\d+) "(.*)"( [^ ]+){1,5}/i, function(msg){
-        robot.logger.info('heard treaty me, message: %j',util.inspect(msg));
-        robot.logger.info('heard treaty me, envelope: %j',util.inspect(msg.envelope));
-        robot.logger.info('heard treaty me, user:  %j',util.inspect(msg.envelope.user));
-        robot.logger.info('heard treaty me, id %j',util.inspect(msg.envelope.user.id));
-        robot.logger.info('heard treaty me, userForId %j',util.inspect(robot.brain.userForId(msg.envelope.user.id)));
-        robot.logger.info('heard treaty me, userForId.name %j',util.inspect(robot.brain.userForId(msg.envelope.user.id).name));
+    robot.respond(/treaty me (\d+) ["“](.*)["”]( [^ ]+){1,5}/i, function(msg){
         var game = msg.match[1]
           , terms = msg.match[2]
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
           ;
 
-        robot.logger.info('Game %d, terms: %s, partners: %j', game, terms, msg.match.slice(2));
         if(!_.contains(players, requestor)){
             msg.reply('I can\'t do that. You\'re not one of my players!'); 
             return msg.reply('You are '+requestor+' and my players are '+players.join(', ')); 
@@ -203,8 +191,6 @@ module.exports = function(robot){
 
         var id = shortid.generate();
         var treaties = robot.brain.get('treaties') || {};
-
-        robot.logger.info('id: %s', id);
 
         treaties[id] = {
             partners: [requestor],
@@ -214,7 +200,7 @@ module.exports = function(robot){
         };
         robot.brain.set('treaties', treaties);
 
-        var partners = msg.match[0].replace(/^.*treaty me \d+ "(.*)"/,'').split(' ');
+        var partners = msg.match[0].replace(/^.*treaty me \d+ ["“](.*)["”]/,'').split(' ');
         partners = partners.map(function(s){
             if(s.indexOf('@') === 0){
                 return s.slice(1);
@@ -223,12 +209,8 @@ module.exports = function(robot){
         });
         partners = _.without(partners, '');
 
-        robot.logger.info('partners: %s', partners.join(', '));
-
         _.each(partners, function(partner){
-            robot.logger.info('proposing: %s', partner);
             partnerStates.propose(partner, id, function(err){
-                robot.logger.info('err? %j', err);
                 if(err){
                     return msg.reply(err);
                 }
@@ -332,5 +314,4 @@ module.exports = function(robot){
         return msg.reply('@channel Treaty '+id+' has been dissolved!');
     });
 
-    robot.logger.info('treaties loaded');
 };
