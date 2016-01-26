@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.27
+// @version      1.0.28
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -41,28 +41,36 @@ function loaded(){
     console.log('injected!');
     s.onLoad = null;
 
+    function detectMe(){
+        var me = ((playGame || {}).me || {}).username || '';
+
+        if(!me){
+            me = $('.nav-list.pull-left a:first').text();
+        }
+        return me;
+    }
+
     function signalToHubot(player,ended){
         'use strict';
         if(!users[player]){
             return;
         }
 
-        setTimeout(function(){
-            $.ajax({
-                url: 'https://hubot-gregcochard.rhcloud.com/hubot/pushturn',
-                method: 'GET',
-                success: function(){
-                    console.log(arguments);
-                },
-                failure: function(){
-                    console.error(arguments);
-                },
-                data: {
-                    user: users[player],
-                    ended: ended
-                }
-            });
-        },100);
+        $.ajax({
+            url: 'https://hubot-gregcochard.rhcloud.com/hubot/pushturn',
+            method: 'GET',
+            success: function(){
+                console.log(arguments);
+            },
+            failure: function(){
+                console.error(arguments);
+            },
+            data: {
+                user: users[player],
+                from: detectMe(),
+                ended: ended
+            }
+        });
     }
 
     function reportDeaths(deaths){

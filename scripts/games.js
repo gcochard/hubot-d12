@@ -859,7 +859,7 @@ module.exports = function(robot) {
         res.send(response);
         var payload = req.query.user;
         var game = detectGame(req.get('referrer'));
-        robot.logger.info('announcing game '+game+' turn');
+        robot.logger.info('announcing game '+game+' turn, thanks to '+req.query.from);
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);
         // if the game has ended and it hasn't been reported yet...
