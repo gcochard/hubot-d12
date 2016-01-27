@@ -770,6 +770,7 @@ module.exports = function(robot) {
         var game = detectGame(req.get('referrer'));
         var treaties = robot.brain.get('treaties') || {};
         treaties = _.map(treaties,function(treaty,id){
+            treaty = treaty || {};
             treaty.id = id;
             return treaty;
         });
