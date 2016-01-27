@@ -181,15 +181,15 @@ module.exports = function(robot){
                 return;
             }
             treaty.partners = _.without(treaty.partners, user);
+            var partnerList = treaty.partners.map(function(user){
+                return '@'+user;
+            }).join(', ');
             if(treaty.partners.length + treaty.pending.length <= 2){
                 msg = partnerList + ': '+user+' has died in treaty '+treaty.id+', dissolving as there are less than 2 living parties left!';
                 robot.messageRoom(gameRoom, msg);
                 delete treaties[treaty.ie];
                 return robot.brain.set('treaties',treaties);
             }
-            var partnerList = treaty.partners.map(function(user){
-                return '@'+user;
-            }).join(', ');
             treaty.pending.concat(treaty.partners);
             treaty.partners = [];
             msg = partnerList + ': since '+user+' has died in treaty '+treaty.id+', would you like to re-ratify or leave? Please respond with "'+robot.name+' ratify|decline me '+treaty.id+'"';
