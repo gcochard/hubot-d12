@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.3
+// @version      1.1.4
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -242,7 +242,7 @@ function loaded(){
 
         function fetchDiceFromHubot(player){
             player = player || (playGame.me || {}).username || getPlayer();
-            var game = window.location.split('/').pop();
+            var game = window.location.pathname.split('/').pop();
             $.ajax({
                 url: 'https://hubot-gregcochard.rhcloud.com/hubot/dice?game='+game,
                 method: 'GET',
