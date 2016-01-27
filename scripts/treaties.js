@@ -177,6 +177,9 @@ module.exports = function(robot){
         var msg = '';
         treaties = _.filter(treaties,{game:game});
         _.each(treaties,function(treaty){
+            if(treaty.partners.indexOf(user) === -1){
+                return;
+            }
             treaty.partners = _.without(treaty.partners, user);
             if(treaty.partners.length + treaty.pending.length <= 2){
                 msg = partnerList + ': '+user+' has died in treaty '+treaty.id+', dissolving as there are less than 2 living parties left!';

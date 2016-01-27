@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.0.28
+// @version      1.0.29
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -238,6 +238,29 @@ function loaded(){
             }
         };
         */
+
+        //var oldSendAttack = playGame.sendAttack;
+        playGame.sendAttack = function(){
+            var ab = $('.attack-button');
+            ab.disable().attr('onclick','');
+            return this.ajax('attack', {
+                'territory_from': this.selectedTerritory,
+                'territory_to': this.targetedTerritory
+            }, (function(_this) {
+                return function(result) {
+                    ab.enable().click(playGame.sendAttack);
+                    if (result.success === true) {
+                        _this.runUpdates(result);
+                        if (_this.status !== 3) {
+                            return _this.updateTurn(result.turn, _this.gameState.territories[_this.selectedTerritory].troops === 1);
+                        }
+                    } else {
+                        _this.reportError(result.error);
+                        return _this.initializeTurn();
+                    }
+                };
+            })(this));
+        };
         
         var oldShowDice = playGame.showDice;
         playGame.showDice = function(att,att_color,def,def_color){
