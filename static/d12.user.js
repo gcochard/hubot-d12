@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.0
+// @version      1.1.1
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -227,17 +227,38 @@ function loaded(){
             }
         });
     }
+    function fetchDiceFromHubot(player){
+        var game = window.location.split('/').pop();
+        $.ajax({
+            url: 'https://hubot-gregcochard.rhcloud.com/hubot/dice?game='+game,
+            method: 'GET',
+            success: function(dice){
+                var dicehtml = dice.map(function(roll){
+                    if(roll.player !== player){
+                        return;
+                    }
+                    return roll.player+': attack('+roll.attack.join(', ')+') defend('+roll.defend.join(', ')+')';
+                }).filter(function(r){
+                    return !!r;
+                }).join('<br>');
+                $('#dice').html(dicehtml);
+            },
+            failure: function(){
+                
+            }
+        });
+    }
     //var hidden = false;
     $(document).ready(function(){
         'use strict';
-        /*
-        var oldRemoveInvites = window.removeInvites;
-        window.removeInvites = function(){
-            if(Ext.get('game-invites')){
-                Ext.DomQuery.select('[id^=invite-]').remove();
-            }
-        };
-        */
+
+        // inject our dice container
+        var $dice = $('#notifications').clone().attr({id:'dice',class:'dice notifications'});
+        $('#notifications').parent().append($treaties);
+        $('ul.nav-list.pull-left').append('<li id="toggle-dice">Toggle Dice</li>');
+        $('#toggle-dice').on('click',function(){
+            $dice.toggle();
+        });
 
         //var oldSendAttack = playGame.sendAttack;
         playGame.sendAttack = function(){
@@ -297,16 +318,6 @@ function loaded(){
             return oldUpdatePlayers.call(this,players);
         };
 
-    /*
-        setTimeout(function(){
-            Ext.DomHelper.append('uPanel-info', {tag: 'span', id: 'separator', html: ' | '});
-            Ext.DomHelper.append('uPanel-info', {tag: 'a', id: 'toggle-treaty', html: 'toggle treaties'});
-            Ext.EventManager.on('toggle-treaty', 'click', function() {
-                hidden = !hidden;
-                Ext.get('game-invites').toggle();
-            });
-        }, 2000);
-    */
         var curPlayer;
 
         function getPlayer(){
