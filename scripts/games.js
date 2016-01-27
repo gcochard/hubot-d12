@@ -895,13 +895,14 @@ module.exports = function(robot) {
         res.send(response);
     });
 
-    robot.router.options('/hubot/pushdice',function(req,res){
+    robot.router.options('/hubot/dice',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, GET');
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
     robot.router.get('/hubot/dice',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
         var stats = robot.brain.get('stats') || {};
         if(req.query.game){
             stats = stats[req.query.game] || stats;
