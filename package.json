@@ -4,6 +4,7 @@
   "description": "Custom Node.js cartridge for OpenShift - sample application",
   "dependencies": {
     "array-difference": "0.0.1",
+    "dive-buddy": "^1.1.1",
     "hubot": "^2.6.0",
     "hubot-scripts": "^2.5.0",
     "hubot-slack": "^3.3.0",

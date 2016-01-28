@@ -262,19 +262,22 @@ module.exports = function(robot) {
     }
 
     function cleanupGame(game,winner){
+        var deaths = robot.brain.get('currentDeaths') || {};
         var players = robot.brain.get('currentPlayers') || {};
         var treaties = robot.brain.get('treaties') || {};
-        var deaths = robot.brain.get('currentDeaths') || {};
+        var finished = robot.brain.get('finishedGames') || {};
         Object.keys(treaties).forEach(function(id){
             if(treaties[id].game === game){
                 delete treaties[id];
             }
         });
-        delete players[game];
         delete deaths[game];
-        robot.brain.set('currentPlayers',players);
+        delete players[game];
+        finished[game] = true;
         robot.brain.set('treaties',treaties);
         robot.brain.set('currentDeaths',deaths);
+        robot.brain.set('finishedGames',finished);
+        robot.brain.set('currentPlayers',players);
         if(!(/^@/.test(winner))){
             winner = '@'+winner;
         }
@@ -860,6 +863,12 @@ module.exports = function(robot) {
         res.send(response);
         var payload = req.query.user;
         var game = detectGame(req.get('referrer'));
+        // if the game has ended and it's already been reported...
+        var finished = robot.brain.get('finishedGames') || {};
+        if(finished[game]){
+            robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
+            return;
+        }
         robot.logger.info('announcing game '+game+' turn, thanks to '+req.query.from);
         var currPlayers = robot.brain.get('currentPlayers') || {};
         robot.logger.info(currPlayers);
