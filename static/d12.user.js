@@ -2,13 +2,17 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.7
+// @version      1.1.8
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
-// @match        http://www.dominating12.com//game/*
+// @match        http://www.dominating12.com/game/*
 // @match        https://dominating12.com/game/*
-// @match        https://www.dominating12.com//game/*
+// @match        https://www.dominating12.com/game/*
+// @match        http://dominating12.com/index.php/game/*
+// @match        http://www.dominating12.com/index.php/game/*
+// @match        https://dominating12.com/index.php/game/*
+// @match        https://www.dominating12.com/index.php/game/*
 // @grant        none
 // ==/UserScript==
 /*global $: false, playGame: true, _: false*/
@@ -260,6 +264,10 @@ function lodashloaded(){
                     url: 'https://hubot-gregcochard.rhcloud.com/hubot/dice?game='+game,
                     method: 'GET',
                     success: function(dice){
+                        if(!(dice instanceof Array)){
+                            console.log('no dice for this game yet :(');
+                            return;
+                        }
                         var dicehtml = dice.map(function(roll){
                             if(roll.player !== player){
                                 return;
