@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.10
+// @version      1.2.0
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -271,6 +271,17 @@ function lodashloaded(){
                 $dice.toggle();
             });
 
+            var $hud = $('#dice').clone().attr({
+                id:'hud',
+                class:'hud notifications',
+                style:'overflow:scroll;height:300px;top:400px;left:0px;position:fixed;'
+            });
+            $('#dice').parent().append($hud);
+            $('ul.nav-list.pull-left').append('<li id="toggle-hud">Toggle HUD</li>');
+            $('#toggle-hud').on('click',function(){
+                $hud.toggle();
+            });
+
             function fetchDiceFromHubot(player){
                 player = player || detectMe();
                 var game = window.location.pathname.split('/').pop();
@@ -337,6 +348,24 @@ function lodashloaded(){
                     clearInterval(playerPollInterval);
                     clearInterval(treatyPollInterval);
                 }
+                var colors = {};
+                var counts = {};
+                $('.tt-color').each(function(idx,el){
+                    el = $(el);
+                    var color = el.find('.tt-inner').text();
+                    colors[color] = colors[color] || 0;
+                    colors[color]++;
+                    var count = el.find('a').text()|0;
+                    counts[color] = counts[color] || 0;
+                    counts[color] += count;
+                });
+                function mapcolor(count,color){
+                    return '<li>'+color + ': '+ count+'</li>';
+                }
+                colors = '<ul>'+_.map(colors,mapcolor)+'</ul>';
+                $('#hud #colors').html(colors);
+                counts = '<ul>'+_.map(counts,mapcolor)+'</ul>';
+                $('#hud #counts').html(counts);
                 return oldRunUpdates.call(this,result);
             };
             var currDead = [];
