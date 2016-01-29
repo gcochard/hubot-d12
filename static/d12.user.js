@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.8
+// @version      1.1.9
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -32,6 +32,20 @@ var users = {
     , suntan: 'tanleach1001'
     , tanleach1001: 'suntan'
 }, players = [], playerColors = {}, playerPollInterval, treatyPollInterval;
+
+function colorDice(roll){
+    var colors = ['green','yellow','red'], idx = 0;
+    if(roll.attack[0]<=roll.defend[0]){
+        idx++;
+    }
+    if(roll.attack.length === 1 || roll.defend.length === 1){
+        return colors[idx];
+    }
+    if(roll.attack[1]<=roll.defend[1]){
+        idx++;
+    }
+    return colors[idx];
+}
 
 // inject lodash
 var s = document.createElement('script');
@@ -249,7 +263,7 @@ function lodashloaded(){
             var $dice = $('#notifications').clone().attr({
                 id:'dice',
                 class:'dice notifications',
-                style:'overflow:scroll;height:400px;'
+                style:'overflow:scroll;height:300px;'
             });
             $('#notifications').parent().append($dice);
             $('ul.nav-list.pull-left').append('<li id="toggle-dice">Toggle Dice</li>');
@@ -272,7 +286,8 @@ function lodashloaded(){
                             if(roll.player !== player){
                                 return;
                             }
-                            return '<li>'+roll.player+': attack('+roll.attack.join(', ')+') defend('+roll.defend.join(', ')+')</li>';
+                            var color = colorDice(roll);
+                            return '<li style="color: '+color+'">'+roll.player+': attack('+roll.attack.join(', ')+') defend('+roll.defend.join(', ')+')</li>';
                         }).filter(function(r){
                             return !!r;
                         }).join('');
