@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.2.0
+// @version      1.2.1
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -276,6 +276,7 @@ function lodashloaded(){
                 class:'hud notifications',
                 style:'overflow:scroll;height:300px;top:400px;left:0px;position:fixed;'
             });
+            $hud.html('<span>Territories: </span><ul id="colors"></ul><span>Troops: </span><ul id="counts"></ul>');
             $('#dice').parent().append($hud);
             $('ul.nav-list.pull-left').append('<li id="toggle-hud">Toggle HUD</li>');
             $('#toggle-hud').on('click',function(){
@@ -352,7 +353,7 @@ function lodashloaded(){
                 var counts = {};
                 $('.tt-color').each(function(idx,el){
                     el = $(el);
-                    var color = el.find('.tt-inner').text();
+                    var color = el.find('.tt-inner').text().toLowerCase();
                     colors[color] = colors[color] || 0;
                     colors[color]++;
                     var count = el.find('a').text()|0;
@@ -360,11 +361,11 @@ function lodashloaded(){
                     counts[color] += count;
                 });
                 function mapcolor(count,color){
-                    return '<li>'+color + ': '+ count+'</li>';
+                    return '<li>'+playerColors[color] + ': '+ count+'</li>';
                 }
-                colors = '<ul>'+_.map(colors,mapcolor)+'</ul>';
+                colors = _.map(colors,mapcolor);
                 $('#hud #colors').html(colors);
-                counts = '<ul>'+_.map(counts,mapcolor)+'</ul>';
+                counts = _.map(counts,mapcolor);
                 $('#hud #counts').html(counts);
                 return oldRunUpdates.call(this,result);
             };
@@ -396,7 +397,8 @@ function lodashloaded(){
                     var $v = $(v);
                     // set the color of the player
                     var node = $v.parent().parent().children(':last').children(':last').children(':last');
-                    playerColors[$v.html()] = node.text().toLowerCase();
+                    playerColors[$v.text()] = node.text().toLowerCase();
+                    playerColors[node.text().toLowerCase()] = $v.text()
                     return $v.html();
                 });
                 if(!players.length){
