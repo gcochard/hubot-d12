@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.2.2
+// @version      1.2.3
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -39,7 +39,7 @@ function colorDice(roll){
         idx++;
     }
     if(roll.attack.length === 1 || roll.defend.length === 1){
-        return colors[idx];
+        return colors[idx?idx+1:0];
     }
     if(roll.attack[1]<=roll.defend[1]){
         idx++;
