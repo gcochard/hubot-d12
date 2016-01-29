@@ -2,7 +2,7 @@
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
 // @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.1.6
+// @version      1.1.7
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
@@ -242,11 +242,14 @@ function lodashloaded(){
             'use strict';
 
             // inject our dice container
-            var $dice = $('#notifications').clone().attr({id:'dice',class:'dice notifications'});
+            var $dice = $('#notifications').clone().attr({
+                id:'dice',
+                class:'dice notifications',
+                style:'overflow:scroll;height:400px;'
+            });
             $('#notifications').parent().append($dice);
             $('ul.nav-list.pull-left').append('<li id="toggle-dice">Toggle Dice</li>');
             $('#toggle-dice').on('click',function(){
-                fetchDiceFromHubot();
                 $dice.toggle();
             });
 
@@ -261,10 +264,10 @@ function lodashloaded(){
                             if(roll.player !== player){
                                 return;
                             }
-                            return roll.player+': attack('+roll.attack.join(', ')+') defend('+roll.defend.join(', ')+')';
+                            return '<li>'+roll.player+': attack('+roll.attack.join(', ')+') defend('+roll.defend.join(', ')+')</li>';
                         }).filter(function(r){
                             return !!r;
-                        }).join('<br>');
+                        }).join('');
                         $dice.html(dicehtml);
                     },
                     failure: function(){
@@ -272,6 +275,7 @@ function lodashloaded(){
                     }
                 });
             }
+            fetchDiceFromHubot();
             setInterval(fetchDiceFromHubot, 30000);
 
             //var oldSendAttack = playGame.sendAttack;
