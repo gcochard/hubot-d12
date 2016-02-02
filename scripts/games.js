@@ -271,7 +271,7 @@ module.exports = function(robot) {
                 delete treaties[id];
             } else if(!treaties[id]){
                 // wtf???
-                robot.logger.warn('WTF? treaties[id] is null, id: %s',id);
+                robot.logger.error('WTF? treaties[id] is null, id: %s',id);
                 delete treaties[id];
             }
         });
