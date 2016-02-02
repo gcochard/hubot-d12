@@ -267,7 +267,11 @@ module.exports = function(robot) {
         var treaties = robot.brain.get('treaties') || {};
         var finished = robot.brain.get('finishedGames') || {};
         Object.keys(treaties).forEach(function(id){
-            if(treaties[id].game === game){
+            if(treaties[id] && treaties[id].game === game){
+                delete treaties[id];
+            } else if(!treaties[id]){
+                // wtf???
+                robot.logger.warn('WTF? treaties[id] is null, id: %s',id);
                 delete treaties[id];
             }
         });
