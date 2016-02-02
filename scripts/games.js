@@ -282,6 +282,14 @@ module.exports = function(robot) {
         robot.brain.set('currentDeaths',deaths);
         robot.brain.set('finishedGames',finished);
         robot.brain.set('currentPlayers',players);
+        if(winner instanceof Array){
+            winner = winner.map(function(w){
+                if(!(/^@/.test(w))){
+                    w = '@'+w;
+                }
+                return w;
+            }).join(', ');
+        }
         if(!(/^@/.test(winner))){
             winner = '@'+winner;
         }
