@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         D12 turn checker for slack
 // @namespace    https://hubot-gregcochard.rhcloud.com/hubot
-// @updateURL    https://hubot-gregcochard.rhcloud.com/hubot/d12.user.js
-// @version      1.2.4
+// @updateURL    https://gist.githubusercontent.com/gcochard/1b6e94b6ae6e2f60a6d8/raw/d12.user.js
+// @version      1.2.5
 // @description  calls hubot with the current player and other features
 // @author       Greg Cochard
 // @match        http://dominating12.com/game/*
