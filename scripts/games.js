@@ -908,7 +908,7 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce join now';
         res.send(response);
-        var payload = req.query.user;
+        var payload = req.body.user;
         var game = detectGame(req.get('referrer'));
         payload += ' has joined game ' + game + ', http://dominating12.com/game/' + game;
         robot.messageRoom(gameRoom,payload);
