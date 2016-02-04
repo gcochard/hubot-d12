@@ -903,7 +903,7 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
-    robot.router.get('/hubot/pushjoin',function(req,res){
+    robot.router.post('/hubot/pushjoin',function(req,res){
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce join now';
