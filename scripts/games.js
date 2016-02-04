@@ -867,7 +867,6 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
-
     robot.router.get('/hubot/pushturn',function(req,res){
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
@@ -897,6 +896,24 @@ module.exports = function(robot) {
             robot.messageRoom(gameRoom,payload);
         }
     });
+
+    robot.router.options('/hubot/pushjoin',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/pushjoin',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce join now';
+        res.send(response);
+        var payload = req.query.user;
+        var game = detectGame(req.get('referrer'));
+        payload += ' has joined game ' + game + ', http://dominating12.com/game/' + game;
+        robot.messageRoom(gameRoom,payload);
+    });
+
     robot.router.options('/hubot/pushdice',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, POST');
