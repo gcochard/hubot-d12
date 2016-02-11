@@ -8,7 +8,7 @@
     "hubot": "^2.6.0",
     "hubot-scripts": "^2.5.0",
     "hubot-slack": "^3.3.0",
-    "lodash": "^2.4.2",
+    "lodash": "^4.3.0",
     "pm2": "^1.0.0",
     "request": "^2.48.0",
     "shortid": "^2.2.2",
