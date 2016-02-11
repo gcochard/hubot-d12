@@ -37,9 +37,7 @@ module.exports = function(robot){
      */
     var formatTreaties = function(incPending,cb){
         var treaties = robot.brain.get('treaties') || {};
-        console.log(util.inspect(treaties));
-        treaties = _.pickBy(treaties,function(ob){return !!ob;});
-        treaties = _.pickBy(treaties,{game:game});
+        treaties = _.pickBy(treaties);
         treaties = _.groupBy(treaties, 'game');
         if(!Object.keys(treaties).length){
             return cb(new Error('No active treaties'));
@@ -184,7 +182,6 @@ module.exports = function(robot){
         var user = data.user;
         var msg = '';
         treaties = _.pickBy(treaties);
-        treaties = _.pickBy(treaties,{game:game});
         _.each(treaties,function(treaty){
             if(treaty.partners.indexOf(user) === -1){
                 return;
@@ -226,7 +223,7 @@ module.exports = function(robot){
 
         var id = shortid.generate();
         var treaties = robot.brain.get('treaties') || {};
-        treaties = _.pickBy(treaties,{game:game});
+        treaties = _.pickBy(treaties);
 
         treaties[id] = {
             partners: [requestor],
@@ -292,7 +289,7 @@ module.exports = function(robot){
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
           , treaties = robot.brain.get('treaties') || {}
           ;
-        treaties = _.pickBy(treaties,{game:game});
+        treaties = _.pickBy(treaties);
 
 
         if(!_.includes(players, requestor)){
@@ -339,7 +336,7 @@ module.exports = function(robot){
         var id = msg.match[2];
         var requestor = robot.brain.userForId(msg.envelope.user.id).name;
         var treaties = robot.brain.get('treaties') || {};
-        treaties = _.pickBy(treaties,{game:game});
+        treaties = _.pickBy(treaties);
 
         if(!treaties || !treaties[id]){
             return msg.reply('I couldnt find that treaty!');
