@@ -96,7 +96,7 @@ module.exports = function(robot){
 
     var partnerStates = {
         propose: function(potentialPartner, treatyId, cb){
-            if(!_.contains(players, potentialPartner)){
+            if(!_.includes(players, potentialPartner)){
                 return cb(potentialPartner+' is not one of my players!');
             }
             robot.logger.info('Fetching treaties...');
@@ -105,11 +105,11 @@ module.exports = function(robot){
             if(!treaties[treatyId]){
                 return cb('I couldn\'t find that treaty!');
             }
-            if(_.contains(treaties[treatyId].partners, potentialPartner)){
+            if(_.includes(treaties[treatyId].partners, potentialPartner)){
                 return cb(potentialPartner+' is already party to that treaty!');
             }
             treaties[treatyId].pending = treaties[treatyId].pending || [];
-            if(_.contains(treaties[treatyId].pending, potentialPartner)){
+            if(_.includes(treaties[treatyId].pending, potentialPartner)){
                 return cb(potentialPartner+' was already invited!');
             }
             treaties[treatyId].pending.push(potentialPartner);
@@ -123,16 +123,16 @@ module.exports = function(robot){
               ;
             treaties = _.pickBy(treaties);
 
-            if(!_.contains(players, sender)){
+            if(!_.includes(players, sender)){
                 return msg.reply('You\'re not one of my players!');
             }
             if(!treaties[id]){
                 return msg.reply('I couldn\'t find that treaty!');
             }
-            if(_.contains(treaties[id].partners, sender)){
+            if(_.includes(treaties[id].partners, sender)){
                 return msg.reply('You are already a party to that treaty!');
             }
-            if(!_.contains(treaties[id].pending, sender)){
+            if(!_.includes(treaties[id].pending, sender)){
                 return msg.reply('This is awkward...but you were\'t invited to that treaty.');
             }
 
@@ -153,13 +153,13 @@ module.exports = function(robot){
               ;
             treaties = _.pickBy(treaties);
 
-            if(!_.contains(players, sender)){
+            if(!_.includes(players, sender)){
                 return msg.reply('You\'re not one of my players!');
             }
             if(!treaties[id]){
                 return msg.reply('I couldn\'t find that treaty!');
             }
-            if(!_.contains(treaties[id].pending, sender)){
+            if(!_.includes(treaties[id].pending, sender)){
                 return msg.reply('This is awkward...but you were\'t invited to that treaty.');
             }
 
@@ -217,7 +217,7 @@ module.exports = function(robot){
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
           ;
 
-        if(!_.contains(players, requestor)){
+        if(!_.includes(players, requestor)){
             msg.reply('I can\'t do that. You\'re not one of my players!'); 
             return msg.reply('You are '+requestor+' and my players are '+players.join(', ')); 
         }
@@ -261,10 +261,10 @@ module.exports = function(robot){
     //      , requestor = robot.brain.userForId(msg.envelope.user.id).mention_name
     //      ;
 
-    //    if(!_.contains(players, requestor)){
+    //    if(!_.includes(players, requestor)){
     //        return msg.reply('I can\'t do that.  You\'re not one of my players!'); 
     //    }
-    //    if(!_.contains(players, partner)){
+    //    if(!_.includes(players, partner)){
     //        return msg.reply('I can\'t do that.  I don\'t know '+partner); 
     //    }
     //    if(requestor === partner){
@@ -293,10 +293,10 @@ module.exports = function(robot){
         treaties = _.pickBy(treaties,{game:game});
 
 
-        if(!_.contains(players, requestor)){
+        if(!_.includes(players, requestor)){
             return msg.reply('I can\'t do that.  You\'re not one of my players!'); 
         }
-        if(!_.contains(players, player)){
+        if(!_.includes(players, player)){
             return msg.reply('I can\'t do that.  I don\'t know '+player+'.'); 
         }
 
@@ -304,7 +304,7 @@ module.exports = function(robot){
             return msg.reply('I couldnt find that treaty!');
         }
 
-        if(!_.contains(treaties[id].partners, requestor)){
+        if(!_.includes(treaties[id].partners, requestor)){
             return msg.reply('You\'re not a member of that treaty!');
         }
 
@@ -342,7 +342,7 @@ module.exports = function(robot){
         if(!treaties || !treaties[id]){
             return msg.reply('I couldnt find that treaty!');
         }
-        if(!_.contains(treaties[id].partners, requestor)){
+        if(!_.includes(treaties[id].partners, requestor)){
             return msg.reply('You\'re not party to that treaty. Tsk Tsk.');
         }
 
