@@ -36,7 +36,8 @@ module.exports = function(robot){
      */
     var formatTreaties = function(incPending,cb){
         var treaties = robot.brain.get('treaties') || {};
-        treaties = _.pickBy(treaties);
+        console.log(util.inspect(treaties));
+        treaties = _.pickBy(treaties,function(ob){return !!ob;});
         treaties = _.pickBy(treaties,{game:game});
         treaties = _.groupBy(treaties, 'game');
         if(!Object.keys(treaties).length){
