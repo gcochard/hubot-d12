@@ -12,6 +12,7 @@
 //   hubot ratify me <id> - Agree to join treaty belonging to the ID
 //   hubot decline me <id> - Decline to join the treaty belonging to the ID
 //   hubot untreaty me <id> - Dissolves treaty belonging to the ID
+//   hubot treaty purge - Dissolves all treaties
 
 /*eslint-env node*/
 'use strict';
@@ -350,6 +351,16 @@ module.exports = function(robot){
         delete treaties[id];
         robot.brain.set('treaties', treaties);
         return msg.reply('@channel Treaty '+id+' has been dissolved!');
+    });
+
+    robot.respond(/treaty purge/i, function(msg){
+        var requestor = robot.brain.userForId(msg.envelope.user.id).name;
+        if(requestor.toLowerCase() === 'greg'){
+            var treaties = robot.brain.remove('treaties');
+            return msg.reply('All treaties have been dissolved!');
+        } else {
+            return msg.reply('Sorry, this is an experimental feature.');
+        }
     });
 
 };
