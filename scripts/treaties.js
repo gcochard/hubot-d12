@@ -204,13 +204,13 @@ module.exports = function(robot){
     });
 
     robot.respond(/split me "["“](.*)["”]( [^ ]+){2,6}/i, function(msg){
-        var order = msg.match[0].replace(/^.*split me ["“](.*)["”]/,'').split(' ');
+        var order = msg.match[0].replace(/^.*split me ["“”](.*)["“”]/,'').split(' ');
         _.each(order, function(name){
             msg.send(name);
         });
     });
 
-    robot.respond(/treaty me (\d+) ["“](.*)["”]( [^ ]+){1,5}/i, function(msg){
+    robot.respond(/treaty me (\d+) ["“”](.*)["“”]( [^ ]+){1,5}/i, function(msg){
         var game = msg.match[1]
           , terms = msg.match[2]
           , requestor = robot.brain.userForId(msg.envelope.user.id).name
@@ -234,7 +234,7 @@ module.exports = function(robot){
         };
         robot.brain.set('treaties', treaties);
 
-        var partners = msg.match[0].replace(/^.*treaty me \d+ ["“](.*)["”]/,'').split(' ');
+        var partners = msg.match[0].replace(/^.*treaty me \d+ ["“”](.*)["“”]/,'').split(' ');
         partners = partners.map(function(s){
             if(s.indexOf('@') === 0){
                 return s.slice(1);
