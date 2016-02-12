@@ -843,7 +843,7 @@ module.exports = function(robot) {
         }
         currGames[game] = true;
         robot.brain.set('currentGames', currGames);
-        var payload = '@channel: game ' + game + ' has been started by ' + user; 
+        var payload = '@channel: game ' + game + ' has been started by ' + user + 'join at https://dominating12.com/game/'+game;
         robot.messageRoom(gameRoom,payload);
     });
 
@@ -883,7 +883,7 @@ module.exports = function(robot) {
                 dead = dead.join(', ');
             }
             payload = '@channel: ' + dead;
-            payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason()+' in game ' + game + ', http://dominating12.com/game/' + game;
+            payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason()+' in game ' + game + ', https://dominating12.com/game/' + game;
             robot.messageRoom(gameRoom,payload);
         }
     });
@@ -919,7 +919,7 @@ module.exports = function(robot) {
             if(!(/^@/.test(payload))){
                 payload = '@'+payload;
             }
-            payload += ' it\'s your turn in game ' + game + ', http://dominating12.com/game/' + game;
+            payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game;
             robot.messageRoom(gameRoom,payload);
         }
     });
@@ -937,7 +937,7 @@ module.exports = function(robot) {
         res.send(response);
         var payload = req.body.user;
         var game = detectGame(req.get('referrer'));
-        payload += ' has joined game ' + game + ', http://dominating12.com/game/' + game;
+        payload += ' has joined game ' + game + ', https://dominating12.com/game/' + game;
         robot.messageRoom(gameRoom,payload);
     });
 
