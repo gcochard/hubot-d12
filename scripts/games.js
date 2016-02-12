@@ -266,6 +266,7 @@ module.exports = function(robot) {
         var players = robot.brain.get('currentPlayers') || {};
         var treaties = robot.brain.get('treaties') || {};
         var finished = robot.brain.get('finishedGames') || {};
+        var current = robot.brain.get('currentGames') || {};
         Object.keys(treaties).forEach(function(id){
             if(treaties[id] && treaties[id].game === game){
                 delete treaties[id];
@@ -277,9 +278,11 @@ module.exports = function(robot) {
         });
         delete deaths[game];
         delete players[game];
+        delete current[game];
         finished[game] = true;
         robot.brain.set('treaties',treaties);
         robot.brain.set('currentDeaths',deaths);
+        robot.brain.set('currentGames',current);
         robot.brain.set('finishedGames',finished);
         robot.brain.set('currentPlayers',players);
         if(winner instanceof Array){
@@ -819,6 +822,26 @@ module.exports = function(robot) {
         }
         return reason;
     }
+
+    robot.router.options('/hubot/pushstart',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.post('/hubot/pushstart',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce start now';
+        res.send(response);
+        var user = req.body.user;
+        var game = detectGame(req.get('referrer'));
+        var currGames = hubot.brain.get('games')||{};
+        currGames[game] = true;
+        hubot.brain.set('currentGames', currGames);
+        var payload payload = '@channel: game ' + game + ' has been started by ' + user; 
+        robot.messageRoom(gameRoom,payload);
+    });
 
     robot.router.options('/hubot/pushdeath',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
