@@ -837,6 +837,10 @@ module.exports = function(robot) {
         var user = req.body.user;
         var game = detectGame(req.get('referrer'));
         var currGames = robot.brain.get('games')||{};
+        if(currGames[game]){
+            robot.logger.info('game '+game+' already started...'+req.body.from+' is stale');
+            return;
+        }
         currGames[game] = true;
         robot.brain.set('currentGames', currGames);
         var payload = '@channel: game ' + game + ' has been started by ' + user; 
