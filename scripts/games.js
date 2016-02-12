@@ -836,11 +836,12 @@ module.exports = function(robot) {
         res.send(response);
         var user = req.body.user;
         var game = detectGame(req.get('referrer'));
-        var currGames = robot.brain.get('games') || {};
+        var currGames = robot.brain.get('currentGames') || {};
         if(currGames[game]){
             robot.logger.info('game '+game+' already started...'+req.body.from+' is stale');
             return;
         }
+        robot.logger.info('game '+game+' started thanks to '+req.body.from);
         currGames[game] = true;
         robot.brain.set('currentGames', currGames);
         var payload = '@channel: game ' + game + ' has been started by ' + user + ' join at https://dominating12.com/game/'+game;
