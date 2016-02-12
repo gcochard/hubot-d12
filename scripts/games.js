@@ -836,10 +836,10 @@ module.exports = function(robot) {
         res.send(response);
         var user = req.body.user;
         var game = detectGame(req.get('referrer'));
-        var currGames = hubot.brain.get('games')||{};
+        var currGames = robot.brain.get('games')||{};
         currGames[game] = true;
-        hubot.brain.set('currentGames', currGames);
-        var payload payload = '@channel: game ' + game + ' has been started by ' + user; 
+        robot.brain.set('currentGames', currGames);
+        var payload = '@channel: game ' + game + ' has been started by ' + user; 
         robot.messageRoom(gameRoom,payload);
     });
 
