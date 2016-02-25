@@ -861,6 +861,11 @@ module.exports = function(robot) {
         res.send(response);
         var payload = req.body.deaths;
         var game = detectGame(req.get('referrer'));
+        var finished = robot.brain.get('finishedGames') || {};
+        if(finished[game]){
+            robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
+            return;
+        }
         robot.logger.info('announcing game '+game+' deaths');
         var currDeaths = robot.brain.get('currentDeaths') || {};
         var gameDeaths = currDeaths[game] || [];
