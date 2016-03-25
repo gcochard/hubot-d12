@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>D12 Dice Data</title>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .axis {
+            font: 13px sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        form {
+            display: inline
+        }
+
+        .r-input {
+            padding: 3px;
+        }
+    </style>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<body>
+    <h2>D12 Dice Roll Analysis</h2>
+    <div id="selectors">
+        <select id="game"></select>
+        <form id="dtype">
+            <input name="rtype" type="radio" value="all" onclick="updateDiceData()" checked><span class="r-input">Both</span>
+            <input name="rtype" type="radio" value="attack" onclick="updateDiceData()"><span class="r-input">Attack</span>
+            <input name="rtype" type="radio" value="defend" onclick="updateDiceData()"><span class="r-input">Defend</span>
+        </form>
+        <!--input type="button" value="Clear" onclick="clearfilters()"/-->
+    </div>
+    <svg id="freqGraph"></svg>
+    <script type="text/javascript">
+        var users = {
+            gcochard: '#00A708',
+            kwren: '#FF6CF2',
+            ryanbmilbourne: '#E9F109',
+            jobratt: '#D90909',
+            mmacfreier: '#0E12B8',
+            // justinb: 'justin',
+            // justin: 'justinb',
+            tanleach1001: '#06DBEE',
+            johnsgill3: '#131313'
+        };
+        var margin = {
+                top: 20,
+                right: 20,
+                bottom: 30,
+                left: 40
+            },
+            width = 800 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        var x = d3.scale.ordinal()
+            .domain(d3.range(1, 7))
+            .rangeRoundBands([0, width], .2);
+        var y = d3.scale.linear()
+            .range([height, 0]);
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .tickFormat(d3.format(".2s"))
+        var svg = d3.select('#freqGraph')
+            .attr("width", 120+width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        var cur_players
+
+        function calcDiceRolls(player) {
+            var data = JSON.parse(window.sessionStorage.getItem('diceData'));
+            var type = d3.select('input[name="rtype"]:checked').property("value")
+            var types
+            if (type == 'all') {
+                types = ['attack', 'defend']
+            } else {
+                types = [type]
+            }
+            var game_id = d3.select("#game").property("value")
+            var players = (game_id == 'All' ? d3.keys(users) :
+                d3.set(data[game_id].map(function(d) {
+                    return d.player;
+                })).values()).reduce(function(o, v, i) {
+                o[v] = 0
+                return o;
+            }, {});
+            cur_players = (player == "" ? d3.keys(players) : [player])
+
+            var dice_cnt = d3.range(0, 6).map(function(d) {
+                return $.extend({}, players)
+            })
+
+            function countGame(g) {
+                g.forEach(function(r) {
+                    if ($.isEmptyObject(r) || !('player' in r))
+                        return
+
+                    types.forEach(function(t) {
+                        if (r[t].constructor === Array) {
+                            r[t].forEach(function(d) {
+                                dice_cnt[d - 1][r.player]++
+                            })
+                        } else {
+                            dice_cnt[r[t] - 1][r.player]++
+                        }
+                    })
+                })
+            }
+
+            if (game_id == "All") {
+                for (var gid in data) {
+                    countGame(data[gid]);
+                }
+            } else
+                countGame(data[game_id]);
+
+            return dice_cnt;
+
+        }
+
+        function updateDiceData() {
+            var player
+            if(this.nodeName == 'text')
+                player = this.textContent
+            else {
+                player = ""
+            }
+            dice_cnts = calcDiceRolls(player);
+            dice_cnts.forEach(function(d) {
+                var y0 = 0;
+                d.bars = cur_players.map(function(name) {
+                    return {
+                        name: name,
+                        y0: y0,
+                        y1: y0 += d[name]
+                    };
+                });
+                d.total = d.bars[d.bars.length - 1].y1;
+            })
+
+            y.domain([0, d3.max(dice_cnts, function(d) {
+                return d.total;
+            })]);
+
+            svg.select('.y.axis')
+                .transition()
+                .duration(500)
+                .call(yAxis)
+
+            var dice = svg.selectAll(".dice")
+                .data(dice_cnts, function(d, i) {
+                    return i + "|" + d.total
+                })
+
+            dice.exit()
+                .transition()
+                .duration(500)
+                .style("fill-opacity", 0)
+                .remove();
+
+            dice.enter().append("g")
+                .attr('class', 'dice')
+                .attr("transform", function(d, i) {
+                    return "translate(" + x(i + 1) + ",0)";
+                });
+
+            dice.selectAll('rect')
+                .data(function(d) {
+                    return d.bars;
+                })
+                .enter().append('rect')
+                .attr('width', x.rangeBand())
+                .attr('y', y(0))
+                .attr('height', height - y(0))
+                .transition()
+                .duration(500)
+                .attr('y', function(d) {
+                    return y(d.y1);
+                })
+                .attr('height', function(d) {
+                    return y(d.y0) - y(d.y1);
+                })
+                .style('fill', function(d) {
+                    return users[d.name];
+                })
+
+            svg.selectAll(".legend").remove();
+
+            legend = svg.selectAll(".legend")
+                .data(d3.entries(users).filter(function (u) { return cur_players.indexOf(u.key) != -1; }))
+
+            legend.enter().append('g')
+                .attr('class', 'legend')
+                .attr('transform', function (d, i) {
+                    return 'translate(115,'+i*20+')';
+                })
+
+            legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", function(d) { return d.value; });
+
+            legend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d) {
+                    return d.key;
+                })
+                //.on('click', updateDiceData)
+        }
+
+        function vizDiceData(error, data) {
+            window.sessionStorage.setItem('diceData', JSON.stringify(data))
+
+            d3.select('#game')
+                .on('change', updateDiceData)
+                .selectAll('option')
+                .data(['All'].concat(d3.keys(data).filter(function(d) {
+                    return d != "undefined";
+                }).sort()))
+                .enter().append('option')
+                .attr('value', function(d) {
+                    return d
+                })
+                .text(function(d) {
+                    return d
+                })
+
+            dice_cnts = calcDiceRolls("");
+            dice_cnts.forEach(function(d) {
+                var y0 = 0;
+                d.bars = cur_players.map(function(name) {
+                    return {
+                        name: name,
+                        y0: y0,
+                        y1: y0 += d[name]
+                    };
+                });
+                d.total = d.bars[d.bars.length - 1].y1;
+            })
+
+            y.domain([0, d3.max(dice_cnts, function(d) {
+                return d.total;
+            })]);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
+
+            var dice = svg.selectAll(".dice")
+                .data(dice_cnts)
+                .enter().append("g")
+                .attr("class", "dice")
+                .attr("transform", function(d, i) {
+                    return "translate(" + x(i + 1) + ",0)";
+                });
+
+            dice.selectAll('rect')
+                .data(function(d) {
+                    return d.bars;
+                })
+                .enter().append('rect')
+                .attr('width', x.rangeBand())
+                .attr('y', function(d) {
+                    return y(d.y1);
+                })
+                .attr('height', function(d) {
+                    return y(d.y0) - y(d.y1);
+                })
+                .style('fill', function(d) {
+                    return users[d.name];
+                })
+
+            var legend = svg.selectAll(".legend")
+                .data(d3.entries(users).filter(function (u) { return cur_players.indexOf(u.key) != -1; }))
+                .enter().append('g')
+                .attr('class', 'legend')
+                .attr('transform', function (d, i) {
+                    return 'translate(115,'+i*20+')';
+                })
+
+            legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", function(d) { return d.value; });
+
+            legend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d) {
+                    return d.key;
+                })
+                //.on('click', updateDiceData)
+        }
+
+        d3.json('https://hubot-gregcochard.rhcloud.com/hubot/dice', vizDiceData);
+    </script>
+</body>
+
+</html>

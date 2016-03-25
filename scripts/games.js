@@ -984,6 +984,7 @@ module.exports = function(robot) {
     robot.router.get('/hubot/checkturnscript.user.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/d12.user.js',serveScript.bind(null,'d12.user.js'));
     robot.router.get('/hubot/d12.inject.user.js',serveScript.bind(null,'d12.inject.user.js'));
+    robot.router.get('/hubot/dice-viz.html',serveScript.bind(null,'dice-viz.html'));
 
     robot.respond(/turn order( [^ ]+){2,6}/i, function(msg) {
         /*
