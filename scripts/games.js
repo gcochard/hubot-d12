@@ -870,7 +870,7 @@ module.exports = function(robot) {
         var currDeaths = robot.brain.get('currentDeaths') || {};
         var gameDeaths = currDeaths[game] || [];
         robot.logger.info(gameDeaths);
-        if(gameDeaths.length !== payload.length){
+        if(gameDeaths.length < payload.length){
             var dead = diff(payload, gameDeaths);
             gameDeaths = payload;
             currDeaths[game] = gameDeaths;
