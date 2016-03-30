@@ -98,6 +98,16 @@
             } else {
                 types = [type]
             }
+            if(window.location.search){
+                var parts = window.location.search.split('=');
+                if(parts.length == 2){
+                    // handle the form ?game=234234
+                    $('#game').val(parts[1]);
+                } else {
+                    // handle the form ?234324
+                    $('#game').val(parts.join().split('?')[1]);
+                }
+            }
             var game_id = d3.select("#game").property("value")
             var players = (game_id == 'All' ? d3.keys(users) :
                 d3.set(data[game_id].map(function(d) {
