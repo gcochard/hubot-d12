@@ -247,6 +247,9 @@
         function vizDiceData(error, data) {
             window.sessionStorage.setItem('diceData', JSON.stringify(data))
 
+            $('#game').change(function(){
+                window.history.pushState({},null,window.location.origin + window.location.pathname + '?'+$(this).val());
+            });
             d3.select('#game')
                 .on('change', updateDiceData)
                 .selectAll('option')
