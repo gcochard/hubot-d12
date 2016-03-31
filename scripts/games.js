@@ -11,6 +11,7 @@
 //   hubot who's turn is it - returns the current player's turn
 //   hubot yell at <user> - reminds the user it is their turn
 //   hubot start game <id> - sets the game id to <id>
+//   hubot restart game <id> - marks the game <id> as in progress
 //   hubot start game - enters interactive mode to start game
 //   hubot current game - replies with the game id
 //   hubot finish game - unsets the game id
@@ -391,6 +392,18 @@ module.exports = function(robot) {
 
     robot.respond(/current game/i,function(msg) {
         msg.reply('current game is '+robot.brain.data.currentGame);
+    });
+
+    robot.respond(/restart game (.*)/i, function(msg) {
+        var game = msg.match[1];
+        clearInterval(interval);
+        var finished = robot.brain.get('finishedGames') || {};
+        var wasFinished = finished[game];
+        delete finished[game];
+        if(wasFinished){
+            robot.brain.set('finishedGames',finished);
+            msg.reply('Restarted game '+game);
+        }
     });
 
     robot.respond(/start game (.*)/i, function(msg) {
