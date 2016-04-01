@@ -12,6 +12,7 @@
 //   hubot yell at <user> - reminds the user it is their turn
 //   hubot start game <id> - sets the game id to <id>
 //   hubot restart game <id> - marks the game <id> as in progress
+//   hubot set verbose game <id> - sets the game <id> to verbose (announces turn starts and finishes)
 //   hubot start game - enters interactive mode to start game
 //   hubot current game - replies with the game id
 //   hubot finish game - unsets the game id
@@ -903,6 +904,66 @@ module.exports = function(robot) {
             }
             payload = '@channel: ' + dead;
             payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason()+' in game ' + game + ', https://dominating12.com/game/' + game;
+            robot.messageRoom(gameRoom,payload);
+        }
+    });
+
+    robot.router.options('/hubot/pushendturn',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/pushendturn',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player ended turn';
+        res.send(response);
+        var payload = req.query.user;
+        var game = detectGame(req.get('referrer'));
+        // if the game has ended and it's already been reported...
+        var finished = robot.brain.get('finishedGames') || {};
+        if(finished[game]){
+            robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
+            return;
+        }
+        robot.logger.info('announcing game '+game+' turn ended, thanks to '+req.query.from);
+        payload += ' ended the turn in game ' + game;
+        if((robot.brain.get('verbose') || {})[game]){
+            robot.messageRoom(gameRoom,payload);
+        }
+    });
+
+    robot.respond(/(un)?set verbose game (\d+)/i, function(msg) {
+        var toggle = msg.match[1]?false:true;
+        var gameId = msg.match[2];
+        var verboses = robot.brain.get('verbose') || {};
+        verboses[gameId] = toggle;
+        robot.brain.set('verbose', verboses);
+    });
+
+    robot.router.options('/hubot/pushstartturn',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','POST, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/pushstartturn',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player starting turn';
+        res.send(response);
+        var payload = req.query.user;
+        var game = detectGame(req.get('referrer'));
+        // if the game has ended and it's already been reported...
+        var finished = robot.brain.get('finishedGames') || {};
+        if(finished[game]){
+            robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
+            return;
+        }
+        robot.logger.info('announcing game '+game+' turn started, thanks to '+req.query.from);
+        payload += ' started the turn in game ' + game;
+        if((robot.brain.get('verbose') || {})[game]){
             robot.messageRoom(gameRoom,payload);
         }
     });
