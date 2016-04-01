@@ -13,6 +13,7 @@
 //   hubot start game <id> - sets the game id to <id>
 //   hubot restart game <id> - marks the game <id> as in progress
 //   hubot set verbose game <id> - sets the game <id> to verbose (announces turn starts and finishes)
+//   hubot get verbose game <id> - gets the game <id> verbose flag
 //   hubot start game - enters interactive mode to start game
 //   hubot current game - replies with the game id
 //   hubot finish game - unsets the game id
@@ -932,6 +933,12 @@ module.exports = function(robot) {
         if((robot.brain.get('verbose') || {})[game]){
             robot.messageRoom(gameRoom,payload);
         }
+    });
+
+    robot.respond(/get verbose game (\d+)/i, function(msg) {
+        var gameId = msg.match[1];
+        var verboses = robot.brain.get('verbose') || {};
+        msg.reply(verboses[gameId]);
     });
 
     robot.respond(/(un)?set verbose game (\d+)/i, function(msg) {
