@@ -776,10 +776,11 @@ module.exports = function(robot) {
 
     robot.router.get('/hubot/d12log/:game',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
-        var game = req.params.game;
+        var game = +req.params.game;
         robot.logger.info('got request for game '+game);
         return fetchD12Log(game, function(err,data){
             if(err){
+                robot.logger.error(err);
                 robot.logger.info('got error for game '+game);
                 return res.json(err);
             }
