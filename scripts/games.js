@@ -767,12 +767,23 @@ module.exports = function(robot) {
         }
     });
 
+    robot.router.options('/hubot/d12log/.*',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','get, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+
     robot.router.get('/hubot/d12log/:game',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
         var game = req.params.game;
+        robot.logger.info('got request for game '+game);
         return fetchD12Log(game, function(err,data){
             if(err){
+                robot.logger.info('got error for game '+game);
                 return res.json(err);
             }
+            robot.logger.info('got data for game '+game);
             return res.json(data);
         });
     });
