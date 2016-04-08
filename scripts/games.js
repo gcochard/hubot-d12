@@ -32,6 +32,7 @@ var vm = require('vm');
 var path = require('path');
 var util = require('util');
 var diff = require('array-difference');
+var fetchD12Log = require('../utils/fetchD12Log');
 var gameRoom = '#games';
 var hereMention = '@channel:';
 var interval;
@@ -764,6 +765,16 @@ module.exports = function(robot) {
                 checkD12(msg.send.bind(msg),game,false);
             });
         }
+    });
+
+    robot.router.get('/hubot/d12log/:game',function(req,res){
+        var game = req.params.game;
+        return fetchD12Log(game, function(err,data){
+            if(err){
+                return res.json(err);
+            }
+            return res.json(data);
+        });
     });
 
     // this is most likely jsonp so abuse it as such
