@@ -29,7 +29,8 @@ var tsReggy = /(\d{2})\s([A-Za-z]{3}),\s(\d{2}):(\d{2}):(\d{2})\s(am|pm)/i
 
 // Message patterns.  Used to determine the player committing the action
 var logPatterns = {
-    roundStart: /Round\s+(\d+)\s+started/
+    gameStart: /Game\sstarted/
+  , roundStart: /Round\s+(\d+)\s+started/
   , startTurn: /(\w+)\sstarted\sthe\sturn/
   , endTurn: /(\w+)\sended\sthe\sturn/
   , joined: /(\w+)\sjoined\sthe\sgame/
@@ -63,7 +64,7 @@ var parseLog = function(log, cb){
     // Year? D12 doesn't do years
     var year = new Date(Date.now()).getFullYear()
 
-    var round = 1 // Round 1 starts when game starts
+    var round = 0 // Round 1 starts when game starts
     log = _.map(log, function(entry){
         // De-html-ify
         var $ = cheerio.load(entry)
@@ -82,7 +83,7 @@ var parseLog = function(log, cb){
             if(!match){
                 return false
             }
-            if(key === 'roundStart'){
+            if(key === 'roundStart' || key === 'gameStart'){
                 round++
                 return true
             }
