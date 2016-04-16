@@ -72,8 +72,18 @@ var parseLog = function(log, cb){
           , logTs = $('.chat-message-time').text().trim()
 
         // Take the d12 timestamp and create a Date that we'll use to get ISO
+        // Note that d12 gives times in Zulu time, not in any locale
         var tsMatch = tsReggy.exec(logTs)
-        var hr = tsMatch[6] === 'am' ? tsMatch[3] : Number(tsMatch[3])+12
+        var meridian = tsMatch[6]
+        var hr = Number(tsMatch[3])
+
+        // d12 uses 12-hour times
+        if(meridian === 'pm' && hr < 12){
+            hr = hr + 12
+        } else if(meridian === 'am' && hr === 12){
+            hr = hr - 12
+        }
+
         var dt = new Date(Date.UTC(year, months[tsMatch[2]], tsMatch[1], hr, tsMatch[4], tsMatch[5]))
 
         // Figure the round and player who triggered the event
