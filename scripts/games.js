@@ -938,7 +938,7 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
-    robot.router.get('/hubot/pushendturn',function(req,res){
+    robot.router.post('/hubot/pushendturn',function(req,res){
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player ended turn';
@@ -978,7 +978,7 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
         res.end();
     });
-    robot.router.get('/hubot/pushstartturn',function(req,res){
+    robot.router.post('/hubot/pushstartturn',function(req,res){
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player starting turn';
