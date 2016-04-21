@@ -1202,7 +1202,8 @@ module.exports = function(robot) {
         if(/^me$/i.test(user)){
             return msg.reply(matchFormat('yelling',msg));
         }
-        if(!robot.brain.data.currentGame){
+        var currentGames = robot.brain.get('currentGames');
+        if(!Object.keys(currentGames).length){
             return msg.reply(matchFormat('I am not tracking a game',msg));
         }
         var currentPlayers = robot.brain.get('currentPlayers');
