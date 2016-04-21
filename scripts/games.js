@@ -157,7 +157,7 @@ module.exports = function(robot) {
                 return cleanupGame(gameId, winnerName);
             }
             var userOrder = _.map(playerList, 'username');
-            fetchD12Log(gameId, function(err, log){
+            fetchD12Log(+gameId, function(err, log){
                 if(err){
                     robot.logger.error(err.message);
                     return send('I couldn\'t find that info, sorry, '+err.message);
@@ -700,10 +700,10 @@ module.exports = function(robot) {
         }
         var match = msg.match[0].match(/in game (\d)+/);
         if(match && match[1]){
-            checkD12(msg.send.bind(msg),match[1],false);
+            checkD12(msg.send.bind(msg),+match[1],false);
         } else {
             Object.keys(robot.brain.get('currentPlayers')).forEach(function(game){
-                checkD12(msg.send.bind(msg),game,false);
+                checkD12(msg.send.bind(msg),+game,false);
             });
         }
     });
@@ -1122,7 +1122,7 @@ module.exports = function(robot) {
             return msg.reply(matchFormat('I am not tracking a game',msg));
         }
         var currentPlayers = robot.brain.get('currentPlayers');
-        if(_.none(currentPlayers, function(currentPlayer){
+        if(!_.some(currentPlayers, function(currentPlayer){
             return formatMessage(currentPlayer).username === user;
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
