@@ -1127,7 +1127,7 @@ module.exports = function(robot) {
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
-        return robot.messageRoom(gameRoom, matchFormat(user,msg));
+        return robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
     });
 
     var asked = 0;
