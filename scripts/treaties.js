@@ -203,7 +203,7 @@ module.exports = function(robot){
         });
     });
 
-    robot.respond(/split me "["“](.*)["”]( [^ ]+){2,6}/i, function(msg){
+    robot.respond(/split me ["“](.*)["”]( [^ ]+){2,6}/i, function(msg){
         var order = msg.match[0].replace(/^.*split me ["“”](.*)["“”]/,'').split(' ');
         _.each(order, function(name){
             msg.send(name);
@@ -353,7 +353,7 @@ module.exports = function(robot){
     robot.respond(/treaty purge/i, function(msg){
         var requestor = robot.brain.userForId(msg.envelope.user.id).name;
         if(requestor.toLowerCase() === 'greg'){
-            var treaties = robot.brain.remove('treaties');
+            robot.brain.remove('treaties');
             return msg.reply('All treaties have been dissolved!');
         } else {
             return msg.reply('Sorry, this is an experimental feature.');

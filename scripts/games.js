@@ -753,7 +753,7 @@ module.exports = function(robot) {
         msg.reply('Game Over!');
     });
 
-    robot.respond(/who'?se? turn is it/i, function(msg) {
+    robot.respond(/who['‘’]?se? turn is it/i, function(msg) {
         if(!Object.keys(robot.brain.get('currentPlayers')||{}).length){
             return msg.reply('I am not tracking any games!');
         }
