@@ -1123,7 +1123,7 @@ module.exports = function(robot) {
         }
         var currentPlayers = robot.brain.get('currentPlayers');
         if(!_.some(currentPlayers, function(currentPlayer){
-            return formatMessage(currentPlayer).username === user;
+            return d12Users[currentPlayer] === user || currentPlayer === user;
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
