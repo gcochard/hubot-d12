@@ -111,6 +111,18 @@ var parseLog = function(log, cb){
     return cb(null, log)
 }
 
+var fetchOrder = function(gameId, cb){
+    var route = util.format('https://dominating12.com/api/game/%s', gameId)
+    request.get({
+        url: route
+    }, function(err, res, body){
+        if(err){
+            return cb(err)
+        }
+        return cb(null, _.pluck(JSON.parse(body).playerList, 'username'))
+    })
+}
+
 /**
  * @callback fetchLogCb
  * @param {Object} err - Error object or null
@@ -150,7 +162,11 @@ var fetchLog = function(gameId, cb){
 }
 
 
-module.exports = fetchLog
+module.exports = {
+    fetchLog: fetchLog,
+    fetchOrder: fetchOrder
+}
+
 /**** Quick example
 var gameId = 629530
 fetchLog(gameId, function(err, data){

@@ -32,7 +32,9 @@ var vm = require('vm');
 var path = require('path');
 var util = require('util');
 var diff = require('array-difference');
-var fetchD12Log = require('../utils/fetchD12Log');
+var fetchd12 = require('../utils/fetchD12Log');
+var fetchD12Log = fetchd12.fetchLog
+var fetchOrder = fetchd12.fetchOrder
 var gameRoom = '#games';
 var hereMention = '@channel:';
 var interval;
@@ -239,29 +241,53 @@ module.exports = function(robot) {
                 var winnerName = d12Users[winner.username];
                 return cleanupGame(gameId, winnerName);
             }
-            var currPlayers = robot.brain.get('currentPlayers') || {};
-            var currPlayer = currPlayers[gameId];
-            var message = 'last I heard, it was '+currPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
-            return send(message);
-            /*
-            newPlayer = d12Users[newPlayer];
-            if(newPlayer){
-                var currPlayer = currPlayers[gameId] || '';
-                var isNew = false;
-                if(currPlayer !== newPlayer){
-                    currPlayers[gameId] = newPlayer;
-                    isNew = true;
+            var userOrder = _.pluck(playerList, 'username');
+            fetchD12Log(gameId, function(err, log){
+                if(err){
+                    robot.logger.error(err.message);
+                    return send('I couldn\'t find that info, sorry, '+err.message);
                 }
+                var lastEnd = log.filter(function(l){
+                    return /ended the turn/.test(l.message);
+                });
+                lastEnd = lastEnd.unshift();
+                var currPlayers = robot.brain.get('currentPlayers') || {};
+                var currPlayer = currPlayers[gameId];
+                var message = '';
+                if(lastEnd.player !== currPlayer){
+                    message = 'last I heard, it was '+currPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
+                    return send(message);
+                }
+                var nextPlayer = userOrder[userOrder.indexOf(currPlayer)+1 % userOrder.length];
+                currPlayers[gameId] = nextPlayer;
+                var payload = nextPlayer;
                 robot.brain.set('currentPlayers',currPlayers);
-            }
-            if(message){
-                send(message);
-            } else if (!frominterval){
-                send('I couldn\'t find that info, sorry');
-            } else {
-                robot.logger.error('message undefined');
-            }
-            */
+                if(!(/^@/.test(payload))){
+                    payload = '@'+payload;
+                }
+                payload += ' it\'s your turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
+                return robot.messageRoom(gameRoom,payload);
+
+                /*
+                newPlayer = d12Users[newPlayer];
+                if(newPlayer){
+                    var currPlayer = currPlayers[gameId] || '';
+                    var isNew = false;
+                    if(currPlayer !== newPlayer){
+                        currPlayers[gameId] = newPlayer;
+                        isNew = true;
+                    }
+                    robot.brain.set('currentPlayers',currPlayers);
+                }
+                if(message){
+                    send(message);
+                } else if (!frominterval){
+                    send('I couldn\'t find that info, sorry');
+                } else {
+                    robot.logger.error('message undefined');
+                }
+                */
+            });
         });
     }
 
@@ -1179,10 +1205,12 @@ module.exports = function(robot) {
         if(!robot.brain.data.currentGame){
             return msg.reply(matchFormat('I am not tracking a game',msg));
         }
-        var currentPlayer = robot.brain.data.currentPlayer;
+        var currentPlayers = robot.brain.get('currentPlayers');
         var resp = formatMessage(user);
         if(resp.message){
-            if(formatMessage(detectPlayer(currentPlayer)).username !== resp.username){
+            if(_.none(currentPlayers, function(currentPlayer){
+                return formatMessage(detectPlayer(currentPlayer)).username === resp.username;
+            })){
                 return msg.reply(matchFormat('It\'s not their turn',msg));
             }
             return robot.messageRoom(gameRoom, matchFormat(resp.message,msg));
