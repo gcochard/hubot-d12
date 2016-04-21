@@ -41,8 +41,24 @@ var interval;
 
 module.exports = function(robot) {
 
+    var d12Users = {
+        mmacfreier:'matt',
+        matt:'mmacfreier',
+        kwren:'kevin',
+        kevin:'kwren',
+        gcochard:'greg',
+        greg:'gcochard',
+        justinb:'justin',
+        justin:'justinb',
+        tanleach1001:'suntan',
+        suntan:'tanleach1001',
+        ryan:'ryanbmilbourne',
+        jobratt:'jonathan',
+        jonathan:'jobratt'
+    };
+
     function formatMessage(username){
-        var name = robot.brain.data.turnOrder.split(' ')[username];
+        var name = d12Users[username];
         if(name){
             return {message:'@'+name+' it\'s your turn',username:name};
         }
@@ -57,75 +73,6 @@ module.exports = function(robot) {
         }
         return {message:'@'+username+' it\'s your turn',username:username};
     }
-
-    function detectWinner(teams){
-        var winnerIndex = _.findIndex(teams,function(v){ return v.status === 8; });
-        var winnerName;
-        if(winnerIndex !== -1){
-            winnerName = robot.brain.data.turnOrder.split(' ')[winnerIndex];
-            robot.messageRoom(gameRoom, hereMention+' Game over! @'+winnerName+' won!');
-            robot.brain.data.currentGame = null;
-            robot.brain.data.currentPlayer = null;
-            robot.brain.data.winners = robot.brain.data.winners || [];
-            robot.brain.data.winners.push(winnerName);
-            robot.brain.data.record = robot.brain.data.record || {};
-            robot.brain.data.record[winnerName] = robot.brain.data.record[winnerName] || 0;
-            robot.brain.data.record[winnerName]++;
-            clearInterval(interval);
-            return true;
-        }
-        return false;
-    }
-
-    function detectPlayer(teams){
-        var currIndex = _.findIndex(teams,function(v){ return v.status === 3; });
-        if(currIndex !== -1){
-            if(robot.brain.data.currIndex === currIndex){
-                return -1;
-            }
-            robot.brain.data.currIndex = currIndex;
-            robot.brain.data.currentPlayer = robot.brain.data.turnOrder.split(' ')[currIndex];
-            return currIndex;
-        }
-        return robot.brain.data.currIndex;
-    }
-
-    var sandbox = vm.createContext({
-        callback: function(obj){
-            var teams = obj.teams;
-            var currWinner = detectWinner(teams);
-            if(currWinner){
-                return null;
-            }
-            var currPlayer = detectPlayer(teams);
-            if(currPlayer === -1){
-                return 'it is '+formatMessage(robot.brain.data.currIndex).username+'\'s turn';
-            }
-            return formatMessage(currPlayer).message;
-        },
-        callbackInterval: function(obj){
-            var teams = obj.teams;
-            var currWinner = detectWinner(teams);
-            if(currWinner){
-                return null;
-            }
-            var currPlayer = detectPlayer(teams,true);
-            if(currPlayer === -1){
-                return null;
-            }
-            return formatMessage(currPlayer).message;
-        },
-        newgameCallback: function(obj){
-            if(obj.success !== true){
-                return obj.message;
-            }
-            var gameId = obj.gameId;
-            clearInterval(interval);
-            robot.brain.data.currentGame = gameId;
-            return 'Current game id set to '+gameId;
-        }
-
-    });
 
     var quotaExhausted = false;
     var quotaExhaustedError = new Error('quota has been exhausted, ignoring request');
@@ -182,38 +129,6 @@ module.exports = function(robot) {
         });
     }
 
-    function checkWebsite(send,frominterval){
-        var nonce = Date.now();
-        var callback = 'callback';
-        if(frominterval){
-            callback = 'callbackInterval';
-        }
-        var currentGameUrl = 'http://gamesbyemail.com/Games/GameMethods.aspx?noCache='+nonce+'&callback='+callback+'&function=GetGame&argCount=1&args=%5B%22'+robot.brain.data.currentGame+'%22%5D';
-        return request(currentGameUrl,function(err,res,body){
-            if(err){
-                robot.logger.error(err.message);
-                return send('I couldn\'t find that info, sorry, '+err.message);
-            }
-            var message = vm.runInNewContext(body,sandbox);
-            if(message){
-                send(message);
-            } else if (!frominterval){
-                send('I couldn\'t find that info, sorry');
-            } else {
-                robot.logger.error('message undefined');
-            }
-        });
-    }
-
-    var d12Users = {
-        mmacfreier:'matt',
-        kwren:'kevin',
-        gcochard:'greg',
-        justinb:'justin',
-        tanleach1001:'suntan',
-        ryanbmilbourne:'ryan',
-        jobratt:'jonathan'
-    };
     function checkD12(send,gameId){
         var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
         return request.get(currentGameUrl,function(err,res,body){
@@ -514,7 +429,7 @@ module.exports = function(robot) {
         jonathanbratt: 'jonathan.bratt@viasat.com'
     };
 
-    var d12Users = {
+    var d12UserIds = {
         gcochard:35533,
         mmacfreier:35688,
         ryanbmilbourne:35689,
@@ -1207,16 +1122,12 @@ module.exports = function(robot) {
             return msg.reply(matchFormat('I am not tracking a game',msg));
         }
         var currentPlayers = robot.brain.get('currentPlayers');
-        var resp = formatMessage(user);
-        if(resp.message){
-            if(_.none(currentPlayers, function(currentPlayer){
-                return formatMessage(detectPlayer(currentPlayer)).username === resp.username;
-            })){
-                return msg.reply(matchFormat('It\'s not their turn',msg));
-            }
-            return robot.messageRoom(gameRoom, matchFormat(resp.message,msg));
+        if(_.none(currentPlayers, function(currentPlayer){
+            return formatMessage(currentPlayer).username === user;
+        })){
+            return msg.reply(matchFormat('It\'s not their turn',msg));
         }
-        return msg.reply(matchFormat('I don\'t know who '+user+' is',msg));
+        return robot.messageRoom(gameRoom, matchFormat(user,msg));
     });
 
     var asked = 0;
