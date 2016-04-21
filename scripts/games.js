@@ -156,7 +156,7 @@ module.exports = function(robot) {
                 var winnerName = d12Users[winner.username];
                 return cleanupGame(gameId, winnerName);
             }
-            var userOrder = _.pluck(playerList, 'username');
+            var userOrder = _.map(playerList, 'username');
             fetchD12Log(gameId, function(err, log){
                 if(err){
                     robot.logger.error(err.message);
