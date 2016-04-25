@@ -1109,8 +1109,9 @@ module.exports = function(robot) {
         msg.send(require('os').hostname());
     });
 
-    robot.respond(/yell( at)? ?(.*)!?/i, function(msg) {
+    robot.respond(/yell( at)? ?(.*)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
         var user = msg.match[2];
+        var count = msg.match[3];
         while(/!$/.test(user)){
             user = user.slice(0,-1);
         }
@@ -1130,7 +1131,17 @@ module.exports = function(robot) {
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
-        return robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
+        if(count === undefined) {
+            return robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
+        }
+
+        if(count > 10) {
+            return msg.reply('It\'s not nice to yell that much.',msg);
+        }
+
+        for(var c = 0; c < count; c++) {
+            robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
+        }
     });
 
     var asked = 0;
