@@ -1109,7 +1109,7 @@ module.exports = function(robot) {
         msg.send(require('os').hostname());
     });
 
-    robot.respond(/yell( at)? ?(.*)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
+    robot.respond(/yell\s+(at\s+)?(\w+)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
         var user = msg.match[2];
         var count = msg.match[3];
         while(/!$/.test(user)){
