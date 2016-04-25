@@ -69,9 +69,12 @@ module.exports = function(robot) {
     function formatMessage(username){
         var name = d12Users[username];
         if(slackUsers.indexOf(username) >= 0){
-            return {message:'@'+name+' it\'s your turn',username:username};
+            return {message:'@'+username+' it\'s your turn',username:username};
         }
-        return {message:'@'+name+' it\'s your turn',username:name};
+        if(slackUsers.indexOf(name) >= 0){
+            return {message:'@'+name+' it\'s your turn',username:name};
+        }
+        return {message:'@'+username+' it\'s your turn',username:username};
     }
 
     var quotaExhausted = false;
