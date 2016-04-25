@@ -42,10 +42,8 @@ var interval;
 module.exports = function(robot) {
 
     var d12Users = {
-        mmacfreier:'matt',
-        matt:'mmacfreier',
-        kwren:'kevin',
-        kevin:'kwren',
+        mmacfreier:'mmacfreier',
+        kwren:'kwren',
         gcochard:'greg',
         greg:'gcochard',
         justinb:'justin',
@@ -53,13 +51,24 @@ module.exports = function(robot) {
         tanleach1001:'suntan',
         suntan:'tanleach1001',
         ryan:'ryanbmilbourne',
-        jobratt:'jonathan',
-        jonathan:'jobratt'
+        jobratt:'jobratt',
+        johnsgill3: 'johnsgill3'
     };
+
+    var slackUsers = [
+        'mmacfreier',
+        'kwren',
+        'gcochard',
+        'justinb',
+        'suntan',
+        'ryan',
+        'jobratt',
+        'johnsgill3'
+    ];
 
     function formatMessage(username){
         var name = d12Users[username];
-        if(name){
+        if(slackUsers.indexOf(name) >= 0){
             return {message:'@'+name+' it\'s your turn',username:name};
         }
         // dereference aliases as long as they exist
@@ -68,7 +77,7 @@ module.exports = function(robot) {
         //while(aliases[name]){
         //    name = aliases[name];
         //}
-        if(name){
+        if(slackUsers.indexOf(name) >= 0){
             return {message:'@'+name+' it\'s your turn',username:name};
         }
         return {message:'@'+username+' it\'s your turn',username:username};
@@ -1123,7 +1132,7 @@ module.exports = function(robot) {
         }
         var currentPlayers = robot.brain.get('currentPlayers');
         if(!_.some(currentPlayers, function(currentPlayer){
-            return d12Users[currentPlayer] === user || currentPlayer === user;
+            return d12Users[currentPlayer] === user;
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
