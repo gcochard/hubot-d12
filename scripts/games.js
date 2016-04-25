@@ -68,19 +68,10 @@ module.exports = function(robot) {
 
     function formatMessage(username){
         var name = d12Users[username];
-        if(slackUsers.indexOf(name) >= 0){
-            return {message:'@'+name+' it\'s your turn',username:name};
+        if(slackUsers.indexOf(username) >= 0){
+            return {message:'@'+name+' it\'s your turn',username:username};
         }
-        // dereference aliases as long as they exist
-        // don't be dumb and put in circular references
-        name = username;
-        //while(aliases[name]){
-        //    name = aliases[name];
-        //}
-        if(slackUsers.indexOf(name) >= 0){
-            return {message:'@'+name+' it\'s your turn',username:name};
-        }
-        return {message:'@'+username+' it\'s your turn',username:username};
+        return {message:'@'+name+' it\'s your turn',username:name};
     }
 
     var quotaExhausted = false;
@@ -1132,7 +1123,7 @@ module.exports = function(robot) {
         }
         var currentPlayers = robot.brain.get('currentPlayers');
         if(!_.some(currentPlayers, function(currentPlayer){
-            return d12Users[currentPlayer] === user;
+            return d12Users[currentPlayer] === user || currentPlayer === user;
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
