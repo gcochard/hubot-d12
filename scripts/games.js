@@ -1136,7 +1136,7 @@ module.exports = function(robot) {
         }
 
         if(count > 10) {
-            return msg.reply('It\'s not nice to yell that much.',msg);
+            return msg.reply(matchFormat('It\'s not nice to yell that much.',msg));
         }
 
         for(var c = 0; c < count; c++) {
