@@ -38,6 +38,7 @@ var fetchOrder = fetchd12.fetchOrder
 var gameRoom = '#games';
 var hereMention = '@channel:';
 var interval;
+var baseRate = 50;
 
 module.exports = function(robot) {
 
@@ -54,6 +55,15 @@ module.exports = function(robot) {
         jobratt:'jobratt',
         johnsgill3: 'johnsgill3'
     };
+
+    setInterval(function(){
+        var rate = robot.brain.get('rateLimit') || {};
+        Object.keys(rate).forEach(function(key){
+            rate[key] += baseRate;
+            rate[key] = Math.min(rate[key], baseRate);
+        });
+        robot.brain.set('rateLimit', rate);
+    }, 60000);
 
     var slackUsers = [
         'mmacfreier',
@@ -1113,6 +1123,10 @@ module.exports = function(robot) {
         var user = msg.match[2];
         var count = msg.match[3] || 1;
         var rate = robot.brain.get('rateLimit') || {};
+
+        // set the rate if it is not yet fixed for this user
+        rate[msg.message.user.id] = rate[msg.message.user.id] == undefined ? baseRate : rate[msg.message.user.id];
+
         while(/!$/.test(user)){
             user = user.slice(0,-1);
         }
@@ -1137,7 +1151,13 @@ module.exports = function(robot) {
             return msg.reply(matchFormat('It\'s not nice to yell that much',msg));
         }
 
+        if(rate[msg.message.user.id] < count){
+            return msg.reply(matchFormat('It\'s not nice to yell that much',msg));
+        }
 
+        rate[msg.message.user.id] -= count;
+
+        robot.brain.set('rateLimit', rate);
 
         for(var c = 0; c < count; c++) {
             robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
@@ -1164,16 +1184,16 @@ module.exports = function(robot) {
     robot.respond(/debug me/i,function(msg){
         switch(++debugged){
         case 1:
-            msg.reply('user: '+msg.user);
+            msg.reply('message.user: '+msg.message.user);
             break;
         case 2:
             msg.reply('message: '+msg.message);
             break;
         case 3:
-            msg.reply('mention_name: '+msg.mention_name);
+            msg.reply('message.user.name: '+msg.message.user.name);
             break;
         case 4:
-            msg.reply('msg: '+util.inspect(msg));
+            msg.reply('message.user.id: '+msg.message.user.id);
             break;
         default:
             debugged = 0;
