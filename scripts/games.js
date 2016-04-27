@@ -1111,7 +1111,8 @@ module.exports = function(robot) {
 
     robot.respond(/yell\s+(at\s+)?(\w+)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
         var user = msg.match[2];
-        var count = msg.match[3];
+        var count = msg.match[3] || 1;
+        var rate = robot.brain.get('rateLimit') || {};
         while(/!$/.test(user)){
             user = user.slice(0,-1);
         }
@@ -1131,13 +1132,12 @@ module.exports = function(robot) {
         })){
             return msg.reply(matchFormat('It\'s not their turn',msg));
         }
-        if(count === undefined) {
-            return robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
-        }
 
         if(count > 10) {
-            return msg.reply(matchFormat('It\'s not nice to yell that much.',msg));
+            return msg.reply(matchFormat('It\'s not nice to yell that much',msg));
         }
+
+
 
         for(var c = 0; c < count; c++) {
             robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
@@ -1161,7 +1161,7 @@ module.exports = function(robot) {
 
     var debugged = 0;
 
-    robot.respond(/debug me /i,function(msg){
+    robot.respond(/debug me/i,function(msg){
         switch(++debugged){
         case 1:
             msg.reply('user: '+msg.user);
@@ -1171,6 +1171,9 @@ module.exports = function(robot) {
             break;
         case 3:
             msg.reply('mention_name: '+msg.mention_name);
+            break;
+        case 4:
+            msg.reply('msg: '+util.inspect(msg));
             break;
         default:
             debugged = 0;
