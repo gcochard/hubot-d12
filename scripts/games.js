@@ -68,7 +68,7 @@ module.exports = function(robot) {
     var slackUsers = [
         'mmacfreier',
         'kwren',
-        'gcochard',
+        'greg',
         'justinb',
         'suntan',
         'ryan',
