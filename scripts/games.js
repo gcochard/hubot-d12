@@ -38,7 +38,7 @@ var fetchOrder = fetchd12.fetchOrder
 var gameRoom = '#games';
 var hereMention = '@channel:';
 var interval;
-var baseRate = 30;
+var baseRate = 15;
 
 module.exports = function(robot) {
 
