@@ -1119,7 +1119,7 @@ module.exports = function(robot) {
         msg.send(require('os').hostname());
     });
 
-    robot.respond(/yell\s+(at\s+)?(\w+)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
+    /*robot.respond(/yell\s+(at\s+)?(\w+)(?:\s+(\d+)\s+times)?!?/i, function(msg) {
         var user = msg.match[2];
         var count = msg.match[3] || 1;
         var rate = robot.brain.get('rateLimit') || {};
@@ -1162,7 +1162,7 @@ module.exports = function(robot) {
         for(var c = 0; c < count; c++) {
             robot.messageRoom(gameRoom, matchFormat(formatMessage(user).message,msg));
         }
-    });
+    });*/
 
     var asked = 0;
     robot.respond(/(identify yourself)|(who are you)|(what is your name)/i,function(msg){
