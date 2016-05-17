@@ -1010,17 +1010,31 @@ module.exports = function(robot) {
         var currMaps = robot.brain.get('currentMaps') || {};
         robot.logger.info(currPlayers);
         // if the game has ended and it hasn't been reported yet...
-        if(req.query.ended && currPlayers[game]){
-            return cleanupGame(game,req.query.user);
-        } else if(currPlayers[game] !== payload){
-            currPlayers[game] = payload;
-            robot.brain.set('currentPlayers',currPlayers);
-            if(!(/^@/.test(payload))){
-                payload = '@'+payload;
+        function updatePayload(){
+            if(req.query.ended && currPlayers[game]){
+                return cleanupGame(game,req.query.user);
+            } else if(currPlayers[game] !== payload){
+                currPlayers[game] = payload;
+                robot.brain.set('currentPlayers',currPlayers);
+                if(!(/^@/.test(payload))){
+                    payload = '@'+payload;
+                }
+                payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+') https://dominating12.com/assets/img/maps/' + currMaps[game] + '.small.jpg';
+                return robot.messageRoom(gameRoom,payload);
             }
-            payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+') https://dominating12.com/assets/img/maps/' + currMaps[game] + '.small.jpg';
-            robot.messageRoom(gameRoom,payload);
         }
+        if(!currMaps[game]){
+            return getD12MapId(game, function(err, map_id){
+                if(err){
+                    currMaps[game] = 1;
+                } else {
+                    currMaps[game] = map_id;
+                }
+                robot.brain.set('currentMaps', currMaps);
+                return updatePayload();
+            });
+        }
+        return updatePayload();
     });
 
     robot.router.options('/hubot/pushjoin',function(req,res){
