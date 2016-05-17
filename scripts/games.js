@@ -1019,7 +1019,7 @@ module.exports = function(robot) {
                 if(!(/^@/.test(payload))){
                     payload = '@'+payload;
                 }
-                payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+') https://dominating12.com/assets/img/maps/' + currMaps[game] + '.small.jpg';
+                payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+')';
                 return robot.messageRoom(gameRoom,payload);
             }
         }
