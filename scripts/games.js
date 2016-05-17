@@ -79,6 +79,11 @@ module.exports = function(robot) {
         'johnsgill3'
     ];
 
+    function getGameData(game){
+        var currMaps = robot.brain.get('currentMaps') || {};
+        return ' in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+')';
+    }
+
     function formatMessage(username){
         var name = d12Users[username];
         if(slackUsers.indexOf(username) >= 0){
@@ -206,7 +211,7 @@ module.exports = function(robot) {
                 var currPlayer = currPlayers[gameId];
                 var message = '';
                 if(lastEnd.player !== currPlayer){
-                    message = 'last I heard, it was '+currPlayer+'\'s turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
+                    message = 'last I heard, it was '+currPlayer+'\'s turn' + getGameData(gameId);
                     return send(message);
                 }
                 var nextPlayer = userOrder[userOrder.indexOf(currPlayer)+1 % userOrder.length];
@@ -1019,7 +1024,7 @@ module.exports = function(robot) {
                 if(!(/^@/.test(payload))){
                     payload = '@'+payload;
                 }
-                payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+')';
+                payload += ' it\'s your turn' + getGameData(game);
                 return robot.messageRoom(gameRoom,payload);
             }
         }
