@@ -5,6 +5,7 @@
 //   lodash
 //   request
 //   array-difference
+//   d12maps
 //
 // Commands:
 //   hubot open the <door type> doors - Opens doors
@@ -55,6 +56,8 @@ module.exports = function(robot) {
         jobratt:'jobratt',
         johnsgill3: 'johnsgill3'
     };
+
+    var d12Maps = require('d12maps');
 
     setInterval(function(){
         var rate = robot.brain.get('rateLimit') || {};
@@ -142,6 +145,26 @@ module.exports = function(robot) {
         });
     }
 
+    function getD12MapId(gameId, cb){
+        var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
+        return request.get(currentGameUrl,function(err,res,body){
+            if(err){
+                robot.logger.error(err.message);
+                return cb(err);
+            }
+            robot.logger.info(gameId);
+            robot.logger.info(body);
+            if(typeof body === 'string'){
+                try {
+                    body = JSON.parse(body);
+                } catch(e){
+                    body = {};
+                }
+            }
+            return cb(null, body.map_id);
+        });
+    }
+
     function checkD12(send,gameId){
         var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
         return request.get(currentGameUrl,function(err,res,body){
@@ -225,6 +248,7 @@ module.exports = function(robot) {
         var treaties = robot.brain.get('treaties') || {};
         var finished = robot.brain.get('finishedGames') || {};
         var current = robot.brain.get('currentGames') || {};
+        var maps = robot.brain.get('currentMaps') || {};
         Object.keys(treaties).forEach(function(id){
             if(treaties[id] && treaties[id].game === game){
                 delete treaties[id];
@@ -237,12 +261,14 @@ module.exports = function(robot) {
         delete deaths[game];
         delete players[game];
         delete current[game];
+        delete maps[game];
         finished[game] = true;
         robot.brain.set('treaties',treaties);
         robot.brain.set('currentDeaths',deaths);
         robot.brain.set('currentGames',current);
         robot.brain.set('finishedGames',finished);
         robot.brain.set('currentPlayers',players);
+        robot.brain.set('currentMaps',maps);
         if(winner instanceof Array){
             winner = winner.map(function(w){
                 if(!(/^@/.test(w))){
@@ -829,6 +855,7 @@ module.exports = function(robot) {
         var user = req.body.user;
         var game = detectGame(req.get('referrer'));
         var currGames = robot.brain.get('currentGames') || {};
+        var currMaps = robot.brain.get('currentMaps') || {};
         if(currGames[game]){
             robot.logger.info('game '+game+' already started...'+req.body.from+' is stale');
             return;
@@ -838,6 +865,13 @@ module.exports = function(robot) {
         robot.brain.set('currentGames', currGames);
         var payload = '@channel: game ' + game + ' has been started by ' + user + ' join at https://dominating12.com/game/'+game;
         robot.messageRoom(gameRoom,payload);
+        return getD12MapId(game, function(err, map_id){
+            if(err){
+                return;
+            }
+            currMaps[game] = map_id;
+            robot.brain.set('currentMaps', currMaps);
+        });
     });
 
     robot.router.options('/hubot/pushdeath',function(req,res){
@@ -973,6 +1007,7 @@ module.exports = function(robot) {
         }
         robot.logger.info('announcing game '+game+' turn, thanks to '+req.query.from);
         var currPlayers = robot.brain.get('currentPlayers') || {};
+        var currMaps = robot.brain.get('currentMaps') || {};
         robot.logger.info(currPlayers);
         // if the game has ended and it hasn't been reported yet...
         if(req.query.ended && currPlayers[game]){
@@ -983,7 +1018,7 @@ module.exports = function(robot) {
             if(!(/^@/.test(payload))){
                 payload = '@'+payload;
             }
-            payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game;
+            payload += ' it\'s your turn in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+') https://dominating12.com/assets/img/maps/' + currMaps[game] + '.small.jpg';
             robot.messageRoom(gameRoom,payload);
         }
     });
