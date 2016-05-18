@@ -54,7 +54,8 @@ module.exports = function(robot) {
         suntan:'tanleach1001',
         ryan:'ryanbmilbourne',
         jobratt:'jobratt',
-        johnsgill3: 'johnsgill3'
+        johnsgill3: 'johnsgill3',
+        terryjbates: 'terryjbates'
     };
 
     var d12Maps = require('d12maps');
