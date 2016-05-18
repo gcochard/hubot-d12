@@ -221,7 +221,7 @@ module.exports = function(robot) {
                 if(!(/^@/.test(payload))){
                     payload = '@'+payload;
                 }
-                payload += ' it\'s your turn in game ' + gameId + ', https://dominating12.com/game/' + gameId;
+                payload += ' it\'s your turn' + getGameData(gameId);
                 return robot.messageRoom(gameRoom,payload);
 
                 /*
@@ -920,7 +920,7 @@ module.exports = function(robot) {
                 dead = dead.join(', ');
             }
             payload = '@channel: ' + dead;
-            payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason()+' in game ' + game + ', https://dominating12.com/game/' + game;
+            payload += ' ' +(plural?'have':'has')+ ' died'+getDeathReason() + getGameData(game);
             robot.messageRoom(gameRoom,payload);
         }
     });
@@ -945,7 +945,7 @@ module.exports = function(robot) {
             return;
         }
         robot.logger.info('announcing game '+game+' turn ended, thanks to '+req.query.from);
-        payload += ' ended the turn in game ' + game;
+        payload += ' ended the turn' + getGameData(game);
         if((robot.brain.get('verbose') || {})[game]){
             robot.messageRoom(gameRoom,payload);
         }
@@ -985,7 +985,7 @@ module.exports = function(robot) {
             return;
         }
         robot.logger.info('announcing game '+game+' turn started, thanks to '+req.query.from);
-        payload += ' started the turn in game ' + game;
+        payload += ' started the turn' + getGameData(game);
         if((robot.brain.get('verbose') || {})[game]){
             robot.messageRoom(gameRoom,payload);
         }
