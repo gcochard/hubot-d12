@@ -35,6 +35,7 @@ var util = require('util');
 var diff = require('array-difference');
 var fetchd12 = require('../utils/fetchD12Log');
 var fetchD12Log = fetchd12.fetchLog
+var cachedFetchLog = fetchd12.cachedFetchLog
 var fetchOrder = fetchd12.fetchOrder
 var gameRoom = '#games';
 var hereMention = '@channel:';
@@ -764,7 +765,10 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Origin','*');
         var game = +req.params.game;
         robot.logger.info('got request for game '+game);
-        return fetchD12Log(game, function(err,data){
+        if(req.query.clearCache){
+            fetchd12.clearCache();
+        }
+        return cachedFetchLog(game, function(err,data){
             if(err){
                 robot.logger.error(err);
                 robot.logger.info('got error for game '+game);

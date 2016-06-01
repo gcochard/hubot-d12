@@ -6,6 +6,7 @@ var cheerio = require('cheerio')
   , _ = require('underscore')
   , request = require('request')
   , util = require('util')
+  , async = require('async')
 
 // D12 uses non-standard times.  We'll use these to make a Date() out of D12 timestamps
 // They use a date string, so here's a quick enum
@@ -161,9 +162,24 @@ var fetchLog = function(gameId, cb){
     })
 }
 
+var memoFetchLog = async.memoize(fetchLog)
+
+function cachedFetchLog(gameId, cb){
+    // cache for 15 minutes
+    setTimeout(function(){
+        delete memoFetchLog.memo[gameId]
+    },15 * 60 * 1000)
+    return memoFetchLog(gameId, cb)
+}
 
 module.exports = {
     fetchLog: fetchLog,
+    cachedFetchLog: cachedFetchLog,
+    clearCache: function(){
+        // memory leak if we don't delete?
+        delete memoFetchLog.memo
+        memoFetchLog = async.memoize(fetchLog)
+    },
     fetchOrder: fetchOrder
 }
 
