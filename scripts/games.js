@@ -1078,8 +1078,7 @@ module.exports = function(robot) {
         var stats = robot.brain.get('stats') || {};
         stats[game] = stats[game] || [];
         stats[game].push(req.body);
-        robot.emit('dice', stats[game]);
-        robot.emit('dice:'+game, stats[game]);
+        robot.emit('dice:'+game, req.body);
         robot.brain.set('stats',stats);
         response += '\n'+JSON.stringify(stats);
         res.send(response);
