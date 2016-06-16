@@ -1107,7 +1107,6 @@ module.exports = function(robot) {
     });
     robot.router.get('/hubot/dicestream',function(req,res){
         var game = detectGame(req.get('referrer'));
-        req.socket.setTimeout(Infinity);
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
