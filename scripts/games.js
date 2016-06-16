@@ -1103,30 +1103,41 @@ module.exports = function(robot) {
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, GET');
         res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.header('Content-Type', 'text/event-stream');
+        res.header('Cache-Control', 'no-cache');
+        res.header('Connection', 'keep-alive');
         res.end();
     });
     robot.router.get('/hubot/dicestream',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','OPTIONS, GET');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.header('Content-Type', 'text/event-stream');
+        res.header('Cache-Control', 'no-cache');
+        res.header('Connection', 'keep-alive');
+        res.status(200);
         var game = detectGame(req.get('referrer'));
-        res.writeHead(200, {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
-        });
         var messageCount = 0;
-        var channel = 'dice';
-        if(game) {
-            channel += ':'+game;
-        }
         function updater(update){
             messageCount++;
             res.write('id: ' + messageCount + '\n');
             res.write('data: ' + JSON.stringify(update) + '\n\n');
         }
+        var channel = 'dice';
+        if(game) {
+            channel += ':'+game;
+        }
         robot.on(channel, updater);
         res.write('\n');
         req.on('close', function(){
-            robot.removeListener(channel, updater);
+            if(robot.events){
+                robot.events.removeListener(channel, updater);
+            } else {
+                robot.logger.error('could not unsubscribe');
+                robot.logger.info(util.inspect(robot.events));
+            }
         });
+        updater('subscribed to channel: "' + channel + '"');
     });
     robot.router.get('/hubot/checkturnscript.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/checkturnscript.user.js',serveScript.bind(null,'checkturnscript.js'));
