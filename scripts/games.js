@@ -1078,6 +1078,8 @@ module.exports = function(robot) {
         var stats = robot.brain.get('stats') || {};
         stats[game] = stats[game] || [];
         stats[game].push(req.body);
+        robot.emit('dice', stats[game]);
+        robot.emit('dice:'+game, stats[game]);
         robot.brain.set('stats',stats);
         response += '\n'+JSON.stringify(stats);
         res.send(response);
@@ -1096,6 +1098,36 @@ module.exports = function(robot) {
             stats = stats[req.query.game] || stats;
         }
         res.send(stats);
+    });
+    robot.router.options('/hubot/dicestream',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','OPTIONS, GET');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/dicestream',function(req,res){
+        var game = detectGame(req.get('referrer'));
+        req.socket.setTimeout(Infinity);
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+        var messageCount = 0;
+        var channel = 'dice';
+        if(game) {
+            channel += ':'+game;
+        }
+        function updater(update){
+            messageCount++;
+            res.write('id: ' + messageCount + '\n');
+            res.write('data: ' + JSON.stringify(update) + '\n\n');
+        }
+        robot.on(channel, updater);
+        res.write('\n');
+        req.on('close', function(){
+            robot.removeListener(channel, updater);
+        });
     });
     robot.router.get('/hubot/checkturnscript.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/checkturnscript.user.js',serveScript.bind(null,'checkturnscript.js'));
