@@ -1098,6 +1098,7 @@ module.exports = function(robot) {
         }
         res.send(stats);
     });
+
     robot.router.options('/hubot/dicestream',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, GET');
@@ -1117,8 +1118,10 @@ module.exports = function(robot) {
         res.status(200);
         var game = detectGame(req.get('referrer'));
         var messageCount = 0;
-        function updater(update){
+        function updater(update, type){
             messageCount++;
+            type = type || 'dice';
+            res.write('event: ' + type + '\n');
             res.write('id: ' + messageCount + '\n');
             res.write('data: ' + JSON.stringify(update) + '\n\n');
         }
@@ -1128,7 +1131,12 @@ module.exports = function(robot) {
         }
         robot.on(channel, updater);
         res.write('\n');
+        // set an interval to keep the stream alive every 5 seconds
+        var intrvl = setInterval(function(){
+            res.write(':keep-alive \n\n');
+        }, 5000);
         req.on('close', function(){
+            clearInterval(intrvl);
             if(robot.events){
                 robot.events.removeListener(channel, updater);
             } else {
@@ -1136,8 +1144,13 @@ module.exports = function(robot) {
                 robot.logger.info(util.inspect(robot.events));
             }
         });
-        updater('subscribed to channel: "' + channel + '"');
+        updater('subscribed to channel: "' + channel + '"', 'handshake');
+
+        var stats = robot.brain.get('stats') || {};
+        stats[game] = stats[game] || [];
+        updater(stats[game]);
     });
+
     robot.router.get('/hubot/checkturnscript.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/checkturnscript.user.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/d12.user.js',serveScript.bind(null,'d12.user.js'));
