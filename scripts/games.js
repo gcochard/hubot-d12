@@ -82,8 +82,8 @@ module.exports = function(robot) {
     ];
 
     function getGameData(game){
-        var currMaps = robot.brain.get('currentMaps') || {};
-        return ' in game ' + game + ', https://dominating12.com/game/' + game + ' ('+d12Maps[currMaps[game]].name+')';
+        var currMaps = robot.brain.get('currentMaps') || {}, currMap = d12Maps[currMaps[game]] || {};
+        return ' in game ' + game + ', https://dominating12.com/game/' + game + ' ('+currMap.name+')';
     }
 
     function formatMessage(username){
