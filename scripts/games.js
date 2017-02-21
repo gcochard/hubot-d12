@@ -1151,7 +1151,7 @@ module.exports = function(robot) {
                 return count;
             }
             // fallback to lexical sorting
-            return b.localeCompare(a);
+            return b.toString().localeCompare(a);
         }
         var sorted = aggarr.sort(sortFn);
         res.json(sorted);
