@@ -1122,7 +1122,7 @@ module.exports = function(robot) {
                 rollset = arr.join(',');
                 agg[rollset] = agg[rollset] || 0;
                 agg[rollset]++;
-            }));
+            });
         });
         res.send(agg);
     });
