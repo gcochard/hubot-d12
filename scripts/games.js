@@ -1099,6 +1099,35 @@ module.exports = function(robot) {
         res.send(stats);
     });
 
+    robot.router.options('/hubot/dicestats',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','OPTIONS, GET');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/dicestats',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        var stats = robot.brain.get('stats') || {};
+        if(req.query.game){
+            var tmp = {};
+            tmp[req.query.game] = stats[req.query.game] || stats;
+            stats = tmp;
+        }
+        var agg = {};
+        Object.keys(stats).forEach(function(game){
+            stats[game].forEach(function(roll){
+                var arr = [];
+                arr.push(...(roll.attack || []));
+                arr.push(...(roll.defend || []));
+                rollset = arr.join(',');
+                agg[rollset] = agg[rollset] || 0;
+                agg[rollset]++;
+            }));
+        });
+
+        res.send(agg);
+    });
+
     robot.router.options('/hubot/dicestream',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, GET');
