@@ -1131,10 +1131,23 @@ module.exports = function(robot) {
             r.valueOf = function(){
                 return r[roll];
             }
+            r.toString = function(){
+                return roll;
+            }
+            r.size = function(){
+                return roll.length;
+            }
             aggarr.push(r);
         }
+        var sortFn = function(a, b){
+            var len = b.size() - a.size();
+            if(len){
+                return len;
+            }
+            return b-a;
+        }
         // sort by number of rolls, descending
-        var sorted = aggarr.sort(function(a, b){ return b-a; });
+        var sorted = aggarr.sort(sortFn);
         res.json(sorted);
     });
 
