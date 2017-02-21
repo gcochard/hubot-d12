@@ -1146,7 +1146,7 @@ module.exports = function(robot) {
                 return len;
             }
             // then sort on roll count
-            count = b-a;
+            var count = b-a;
             if(count){
                 return count;
             }
