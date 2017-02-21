@@ -1113,7 +1113,7 @@ module.exports = function(robot) {
             tmp[req.query.game] = stats[req.query.game] || stats;
             stats = tmp;
         }
-        var agg = {};
+        var agg = Object.create(null);
         Object.keys(stats).forEach(function(game){
             stats[game].forEach(function(roll){
                 var arr = [];
@@ -1124,7 +1124,15 @@ module.exports = function(robot) {
                 agg[rollset]++;
             });
         });
-        res.send(agg);
+        var aggarr = [];
+        for(roll in agg){
+            let r = {};
+            r[roll] = agg[roll];
+            aggarr.push(r);
+        }
+        // sort by number of rolls
+        var sorted = aggarr.sort(function(r){ return r[Object.keys(r).pop()]; }))
+        res.json(sorted);
     });
 
     robot.router.options('/hubot/dicestream',function(req,res){
