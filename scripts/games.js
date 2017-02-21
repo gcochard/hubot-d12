@@ -1125,7 +1125,7 @@ module.exports = function(robot) {
             });
         });
         var aggarr = [];
-        for(roll in agg){
+        for(let roll in agg){
             let r = {};
             r[roll] = agg[roll];
             aggarr.push(r);
