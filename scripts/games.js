@@ -1124,7 +1124,6 @@ module.exports = function(robot) {
                 agg[rollset]++;
             }));
         });
-
         res.send(agg);
     });
 
