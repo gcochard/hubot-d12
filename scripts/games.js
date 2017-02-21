@@ -1141,12 +1141,18 @@ module.exports = function(robot) {
         }
         var sortFn = function(a, b){
             var len = b.size() - a.size();
+            // first sort on dice
             if(len){
                 return len;
             }
-            return b-a;
+            // then sort on roll count
+            count = b-a;
+            if(count){
+                return count;
+            }
+            // fallback to lexical sorting
+            return b.localeCompare(a);
         }
-        // sort by number of rolls, descending
         var sorted = aggarr.sort(sortFn);
         res.json(sorted);
     });
