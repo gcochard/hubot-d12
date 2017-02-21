@@ -1128,10 +1128,13 @@ module.exports = function(robot) {
         for(let roll in agg){
             let r = {};
             r[roll] = agg[roll];
+            r.valueOf = function(){
+                return r[roll];
+            }
             aggarr.push(r);
         }
-        // sort by number of rolls
-        var sorted = aggarr.sort(function(r){ return r[Object.keys(r).pop()]; });
+        // sort by number of rolls, descending
+        var sorted = aggarr.sort(function(a, b){ return b-a; });
         res.json(sorted);
     });
 
