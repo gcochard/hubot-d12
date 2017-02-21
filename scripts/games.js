@@ -1119,7 +1119,7 @@ module.exports = function(robot) {
                 var arr = [];
                 arr.push(...(roll.attack || []));
                 arr.push(...(roll.defend || []));
-                rollset = arr.join(',');
+                var rollset = arr.join(',');
                 agg[rollset] = agg[rollset] || 0;
                 agg[rollset]++;
             });
