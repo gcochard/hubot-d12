@@ -1131,7 +1131,7 @@ module.exports = function(robot) {
             aggarr.push(r);
         }
         // sort by number of rolls
-        var sorted = aggarr.sort(function(r){ return r[Object.keys(r).pop()]; }))
+        var sorted = aggarr.sort(function(r){ return r[Object.keys(r).pop()]; });
         res.json(sorted);
     });
 
