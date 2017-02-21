@@ -1135,7 +1135,7 @@ module.exports = function(robot) {
                 return roll;
             }
             r.size = function(){
-                return roll.length;
+                return roll.split('').filter(c=>{return c==',';}).length;
             }
             aggarr.push(r);
         }
