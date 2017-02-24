@@ -10,7 +10,7 @@
     "dive-buddy": "^1.1.1",
     "hubot": "^2.6.0",
     "hubot-scripts": "^2.5.0",
-    "hubot-slack": "^3.3.0",
+    "hubot-slack": "^4.3.2",
     "lodash": "^4.3.0",
     "pm2": "^1.1.0",
     "request": "^2.48.0",
