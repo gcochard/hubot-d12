@@ -83,7 +83,7 @@ module.exports = function(robot) {
 
     function getGameData(game){
         var currMaps = robot.brain.get('currentMaps') || {}, currMap = d12Maps[currMaps[game]] || {};
-        return ' in game ' + game + ', https://dominating12.com/game/' + game + ' ('+currMap.name+')';
+        return ` in <https://dominating12.com/game/${game}|game ${game}> (${currMap.name})`;
     }
 
     function formatMessage(username){
