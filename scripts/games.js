@@ -81,9 +81,10 @@ module.exports = function(robot) {
         'johnsgill3'
     ];
 
-    function getGameData(game){
+    function getGameData(game, joined){
         var currMaps = robot.brain.get('currentMaps') || {}, currMap = d12Maps[currMaps[game]] || {};
-        return ` in <https://dominating12.com/game/${game}|game ${game}> (${currMap.name})`;
+        var mapName = currMap.name?' (${currMap.name})':'';
+        return ` ${joined?'has joined':'in'} <https://dominating12.com/game/${game}|game ${game}>${mapName}`;
     }
 
     function formatMessage(username){
@@ -1060,7 +1061,7 @@ module.exports = function(robot) {
         res.send(response);
         var payload = req.body.user;
         var game = detectGame(req.get('referrer'));
-        payload += ' has joined game ' + game + ', https://dominating12.com/game/' + game;
+        payload += getGameData(game, true);
         robot.messageRoom(gameRoom,payload);
     });
 
