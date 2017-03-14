@@ -772,9 +772,7 @@ module.exports = function(robot) {
     });
 
     robot.respond(/who['‘’]?se? turn is it.*/i, function(msg) {
-        msg.reply(`debug: ${msg.match}`);
         var match = msg.match[0].match(/in game (\d+)/);
-        msg.reply(`debug: ${match}`);
         if(match && match[1]){
             return checkD12(msg.send.bind(msg),+match[1],false);
         } else {
