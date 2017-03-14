@@ -164,6 +164,35 @@ var fetchLog = function(gameId, cb){
 
 var memoFetchLog = async.memoize(fetchLog)
 
+const updateUrlTmpl = 'https://dominating12.com/game/$$GAME$$/play/update-state'
+
+var fetchTurn = function(gameId, cb){
+    const updateUrl = updateUrlTmpl.replace('$$GAME$$', gameId)
+    return request({url:updateUrl, method: 'POST', json:true, data: {last_update: Date.now()/1000}}, function(err, data){
+        if(err){
+            return cb(err)
+        }
+        var players = _.sortBy(_.map(data.body.players, function(user){
+            var r = {id: user.player_id - 1};
+            r.user_id = user.user_id;
+            r.username = user.username;
+            return r;
+        }), 'id');
+
+        return cb(null, {turn: data.body.turns[0], players: players})
+    })
+}
+
+var fetchExp = function(gameId, cb){
+    const updateUrl = updateUrlTmpl.replace('$$GAME$$', gameId)
+    return request({url:updateUrl, method: 'POST', json:true, data: {last_update: Date.now()/1000}}, function(err, data){
+        if(err){
+            return cb(err)
+        }
+        return cb(null, data.body.turns[0].expires_at)
+    })
+}
+
 function cachedFetchLog(gameId, cb){
     // cache for 15 minutes
     setTimeout(function(){
@@ -174,6 +203,8 @@ function cachedFetchLog(gameId, cb){
 
 module.exports = {
     fetchLog: fetchLog,
+    fetchExp: fetchExp,
+    fetchTurn: fetchTurn,
     cachedFetchLog: cachedFetchLog,
     clearCache: function(){
         // memory leak if we don't delete?

@@ -33,8 +33,10 @@ var vm = require('vm');
 var path = require('path');
 var util = require('util');
 var diff = require('array-difference');
+var moment = require('moment');
 var fetchd12 = require('../utils/fetchD12Log');
 var fetchD12Log = fetchd12.fetchLog
+var fetchTurn = fetchd12.fetchTurn
 var cachedFetchLog = fetchd12.cachedFetchLog
 var fetchOrder = fetchd12.fetchOrder
 var gameRoom = '#games';
@@ -80,6 +82,21 @@ module.exports = function(robot) {
         'jobratt',
         'johnsgill3'
     ];
+
+    function getTurnExpires(game, cb){
+        return fetchTurn(game, function(err, res){
+            if(err){
+                return cb(err);
+            }
+            var exp = res.turn.expires_at;
+            var player = _.find(res.players, {'user_id': res.turn.user_id});
+            var now = moment.utc(Date.now());
+            exp = moment.utc(exp);
+            var diff = moment.duration(exp - now);
+            var res = {human: diff.humanize(), exact: {hours: diff.hours(), minutes: diff.minutes()}, player: player.username};
+            return cb(null, res);
+        });
+    }
 
     function getGameData(game, joined){
         var currMaps = robot.brain.get('currentMaps') || {}, currMap = d12Maps[currMaps[game]] || {};
@@ -200,7 +217,7 @@ module.exports = function(robot) {
                 var winnerName = d12Users[winner.username];
                 return cleanupGame(gameId, winnerName);
             }
-            var userOrder = _.map(playerList, 'username');
+            var userOrder = _.map(players, 'username');
             fetchD12Log(+gameId, function(err, log){
                 if(err){
                     robot.logger.error(err.message);
@@ -213,10 +230,16 @@ module.exports = function(robot) {
                 var currPlayers = robot.brain.get('currentPlayers') || {};
                 var currPlayer = currPlayers[gameId];
                 var message = '';
-                if(lastEnd.player !== currPlayer){
-                    message = 'last I heard, it was '+currPlayer+'\'s turn' + getGameData(gameId);
+                var gameData = getGameData(gameId);
+                message = 'last I heard, it was '+currPlayer+'\'s turn' + gameData;
+                return getTurnExpires(gameId, function(err, exp){
+                    if(err){
+                        return send(message);
+                    }
+                    message = `last I heard, it was ${exp.player}'s turn ${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
                     return send(message);
-                }
+                });
+                /*
                 var nextPlayer = userOrder[userOrder.indexOf(currPlayer)+1 % userOrder.length];
                 currPlayers[gameId] = nextPlayer;
                 var payload = nextPlayer;
@@ -225,7 +248,14 @@ module.exports = function(robot) {
                     payload = '@'+payload;
                 }
                 payload += ' it\'s your turn' + getGameData(gameId);
-                return robot.messageRoom(gameRoom,payload);
+                return getTurnExpires(gameId, function(err, exp){
+                    if(err){
+                        return robot.messageRoom(gameRoom,payload);
+                    }
+                    payload += ` time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
+                    return robot.messageRoom(gameRoom,payload);
+                });
+                */
 
                 /*
                 newPlayer = d12Users[newPlayer];
@@ -741,16 +771,18 @@ module.exports = function(robot) {
         msg.reply('Game Over!');
     });
 
-    robot.respond(/who['‘’]?se? turn is it/i, function(msg) {
-        if(!Object.keys(robot.brain.get('currentPlayers')||{}).length){
-            return msg.reply('I am not tracking any games!');
-        }
-        var match = msg.match[0].match(/in game (\d)+/);
+    robot.respond(/who['‘’]?se? turn is it.*/i, function(msg) {
+        msg.reply(`debug: ${msg.match}`);
+        var match = msg.match[0].match(/in game (\d+)/);
+        msg.reply(`debug: ${match}`);
         if(match && match[1]){
-            checkD12(msg.send.bind(msg),+match[1],false);
+            return checkD12(msg.send.bind(msg),+match[1],false);
         } else {
+            if(!Object.keys(robot.brain.get('currentPlayers')||{}).length){
+                return msg.reply('I am not tracking any games!');
+            }
             Object.keys(robot.brain.get('currentPlayers')).forEach(function(game){
-                checkD12(msg.send.bind(msg),+game,false);
+                return checkD12(msg.send.bind(msg),+game,false);
             });
         }
     });
