@@ -236,7 +236,7 @@ module.exports = function(robot) {
                     if(err){
                         return send(message);
                     }
-                    message = `last I heard, it was ${exp.player}'s turn ${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
+                    message = `last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
                     return send(message);
                 });
                 /*
