@@ -218,6 +218,7 @@ module.exports = function(robot) {
                 return cleanupGame(gameId, winnerName);
             }
             var userOrder = _.map(players, 'username');
+            var gameData = getGameData(gameId);
             return getTurnExpires(gameId, function(err, exp){
                 if(err){
                     return send(message);
