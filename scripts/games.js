@@ -56,6 +56,7 @@ module.exports = function(robot) {
         tanleach1001:'suntan',
         suntan:'tanleach1001',
         ryan:'ryanbmilbourne',
+        ryanbmilbourne:'ryan',
         jobratt:'jobratt',
         johnsgill3: 'johnsgill3',
         terryjbates: 'terryjbates'
