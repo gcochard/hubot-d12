@@ -93,7 +93,7 @@ module.exports = function(robot) {
             var now = moment.utc(Date.now());
             exp = moment.utc(exp);
             var diff = moment.duration(exp - now);
-            var res = {human: diff.humanize(), exact: {hours: diff.hours(), minutes: diff.minutes()}, player: player.username};
+            var res = {human: diff.humanize(), exact: {hours: diff.hours(), minutes: diff.minutes()}, player: d12Users[player.username] || player.username};
             return cb(null, res);
         });
     }
@@ -218,64 +218,12 @@ module.exports = function(robot) {
                 return cleanupGame(gameId, winnerName);
             }
             var userOrder = _.map(players, 'username');
-            fetchD12Log(+gameId, function(err, log){
+            return getTurnExpires(gameId, function(err, exp){
                 if(err){
-                    robot.logger.error(err.message);
-                    return send('I couldn\'t find that info, sorry, '+err.message);
-                }
-                var lastEnd = log.filter(function(l){
-                    return /ended the turn/.test(l.message);
-                });
-                lastEnd = lastEnd.unshift();
-                var currPlayers = robot.brain.get('currentPlayers') || {};
-                var currPlayer = currPlayers[gameId];
-                var message = '';
-                var gameData = getGameData(gameId);
-                message = 'last I heard, it was '+currPlayer+'\'s turn' + gameData;
-                return getTurnExpires(gameId, function(err, exp){
-                    if(err){
-                        return send(message);
-                    }
-                    message = `last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
                     return send(message);
-                });
-                /*
-                var nextPlayer = userOrder[userOrder.indexOf(currPlayer)+1 % userOrder.length];
-                currPlayers[gameId] = nextPlayer;
-                var payload = nextPlayer;
-                robot.brain.set('currentPlayers',currPlayers);
-                if(!(/^@/.test(payload))){
-                    payload = '@'+payload;
                 }
-                payload += ' it\'s your turn' + getGameData(gameId);
-                return getTurnExpires(gameId, function(err, exp){
-                    if(err){
-                        return robot.messageRoom(gameRoom,payload);
-                    }
-                    payload += ` time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
-                    return robot.messageRoom(gameRoom,payload);
-                });
-                */
-
-                /*
-                newPlayer = d12Users[newPlayer];
-                if(newPlayer){
-                    var currPlayer = currPlayers[gameId] || '';
-                    var isNew = false;
-                    if(currPlayer !== newPlayer){
-                        currPlayers[gameId] = newPlayer;
-                        isNew = true;
-                    }
-                    robot.brain.set('currentPlayers',currPlayers);
-                }
-                if(message){
-                    send(message);
-                } else if (!frominterval){
-                    send('I couldn\'t find that info, sorry');
-                } else {
-                    robot.logger.error('message undefined');
-                }
-                */
+                message = `last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
+                return send(message);
             });
         });
     }
