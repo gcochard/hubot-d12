@@ -195,7 +195,7 @@ module.exports = function(robot) {
         return request.get(currentGameUrl,function(err,res,body){
             if(err){
                 robot.logger.error(err.message);
-                return send('I couldn\'t find that info, sorry, '+err.message);
+                return send(`I couldnt find that info, sorry, ${err.message}`);
             }
             robot.logger.info(gameId);
             robot.logger.info(body);
@@ -221,10 +221,9 @@ module.exports = function(robot) {
             var gameData = getGameData(gameId);
             return getTurnExpires(gameId, function(err, exp){
                 if(err){
-                    return send(message);
+                    return send(`I couldn't find that info, sorry, ${err.message}`);
                 }
-                message = `last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`;
-                return send(message);
+                return send(`last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`);
             });
         });
     }
