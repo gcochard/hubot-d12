@@ -9,6 +9,9 @@ var util = require('util');
 
 module.exports = function(robot){
     robot.hear(/.*[^:]in[^:].*/, function(msg){
+        if(/Pssst! I didn.t unfurl /.test(msg)){
+            return;
+        }
         if(Math.random() < .9){
             return;
         }
