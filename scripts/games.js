@@ -221,8 +221,19 @@ module.exports = function(robot) {
             var userOrder = _.map(players, 'username');
             var gameData = getGameData(gameId);
             return getTurnExpires(gameId, function(err, exp){
+                var currPlayers = robot.brain.get('currentPlayers') || {};
                 if(err){
                     return send(`I couldn't find that info, sorry, ${err.message}`);
+                }
+                if(currPlayers[gameId] !== exp.player){
+                  let payload = exp.player;
+                  currPlayers[gameId] = exp.player;
+                  robot.brain.set('currentPlayers', currPlayers);
+                  if(!(/^@/.test(payload))){
+                      payload = '@'+payload;
+                  }
+                  payload += ' it\'s your turn' + gameData;
+                  return robot.messageRoom(gameRoom,payload);
                 }
                 return send(`last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`);
             });
