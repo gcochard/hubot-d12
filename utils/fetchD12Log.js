@@ -179,7 +179,7 @@ var fetchTurn = function(gameId, cb){
             return r;
         }), 'id');
 
-        return cb(null, {turn: data.body.turns[0], players: players})
+        return cb(null, {turn: data.body.turns[0]||{}, players: players})
     })
 }
 

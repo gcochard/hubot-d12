@@ -91,10 +91,11 @@ module.exports = function(robot) {
             }
             var exp = res.turn.expires_at;
             var player = _.find(res.players, {'user_id': res.turn.user_id});
+            var inProgress = res.turn.step !== 0;
             var now = moment.utc(Date.now());
             exp = moment.utc(exp);
             var diff = moment.duration(exp - now);
-            var res = {human: diff.humanize(), exact: {hours: diff.hours(), minutes: diff.minutes()}, player: d12Users[player.username] || player.username};
+            var res = {human: diff.humanize(), exact: {hours: diff.hours(), minutes: diff.minutes()}, player: d12Users[player.username] || player.username, inProgress: inProgress};
             return cb(null, res);
         });
     }
@@ -235,7 +236,14 @@ module.exports = function(robot) {
                   payload += ' it\'s your turn' + gameData;
                   return robot.messageRoom(gameRoom,payload);
                 }
-                return send(`last I heard, it was ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`);
+                if(exp.inProgress){
+                    let hurry = '';
+                    if(exp.exact.minutes < 5){
+                        hurry += ` Hurry up and finish the turn @${exp.player}!`;
+                    }
+                    return send(`It is ${exp.player}'s turn${gameData}, and they are currently taking their turn. Time left: about ${exp.human}.${hurry}`);
+                }
+                return send(`It is ${exp.player}'s turn${gameData}, time left: about ${exp.human} (${exp.exact.hours} hours and ${exp.exact.minutes} minutes)`);
             });
         });
     }
