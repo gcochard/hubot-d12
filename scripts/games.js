@@ -290,17 +290,24 @@ module.exports = function(robot) {
         return robot.messageRoom(gameRoom,payload);
     }
 
+    function checkAllD12(){
+        Object.keys(robot.brain.get('currentGames')||{}).forEach(function(gameId){
+            checkD12(robot.messageRoom.bind(robot, gameRoom), gameId);
+        });
+    }
 
     // only start interval on startup if there's already a game going
-    /* -- commenting this out for now
+    ///* -- commenting this out for now
     if((robot.brain.get('currentGames')||[]).length){
         clearInterval(interval);
         interval = setInterval(function(){
-            checkD12(robot.messageRoom.bind(robot,gameRoom),true);
+            checkAllD12();
+            //checkD12(robot.messageRoom.bind(robot,gameRoom),true);
         },15*60*1000);
-        checkD12(robot.messageRoom.bind(robot,gameRoom),true);
+        //checkD12(robot.messageRoom.bind(robot,gameRoom),true);
+        checkAllD12();
     }
-    */
+    //*/
 
     robot.respond(/rank/i,function(msg){
         var ranking =
