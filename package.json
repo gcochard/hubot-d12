@@ -9,7 +9,7 @@
     "d12maps": "^1.0.1",
     "dive-buddy": "^1.1.1",
     "hubot": "^2.6.0",
-    "hubot-mysql-brain": "^0.1.3",
+    "hubot-datastore-brain": "^0.1.1",
     "hubot-scripts": "^2.5.0",
     "hubot-slack": "^4.3.2",
     "lodash": "^4.3.0",
