@@ -5,9 +5,9 @@ exports.gen = function () {
   return [{
     name: 'Node.js Version',
     value: process.version.replace('v', '')
-  } , {
+/*  } , {
     name:  'NPM Version',
-    value: exec('npm --version').toString().replace(os.EOL, '')
+    value: exec('npm --version').toString().replace(os.EOL, '')*/
   }, {
     name:  'OS Type',
     value: os.type()

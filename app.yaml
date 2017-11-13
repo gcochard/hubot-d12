@@ -6,8 +6,6 @@ handlers:
   script: server.js
 
 env_variables:
-  MYSQL_URL: mysql://hubot:hubot-has-a-long-password@mysql/hubot
   HUBOT_SLACK_TOKEN: xoxb-8140795974-MdgmrcdrK0XwOSrh4G5ETTiA
-  MYSQL_TABLE: brain
   NODE_IP: 0.0.0.0
   NODE_PORT: 8080
