@@ -192,7 +192,7 @@ module.exports = function(robot) {
         });
     }
 
-    function checkD12(send,gameId){
+    function checkD12(send,gameId, frompush){
         var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
         return request.get(currentGameUrl,function(err,res,body){
             if(err){
@@ -235,6 +235,10 @@ module.exports = function(robot) {
                   }
                   payload += ' it\'s your turn' + gameData;
                   return robot.messageRoom(gameRoom,payload);
+                }
+                if(frompush){
+                  // this should be a no-op
+                  return;
                 }
                 if(exp.inProgress){
                     let hurry = '';
@@ -1030,7 +1034,7 @@ module.exports = function(robot) {
             if(req.query.ended && currPlayers[game]){
                 return cleanupGame(game,req.query.user);
             }
-            checkD12(robot.messageRoom.bind(robot, gameRoom), game);
+            checkD12(robot.messageRoom.bind(robot, gameRoom), game, true);
             return;
             /*
             } else if(currPlayers[game] !== payload){

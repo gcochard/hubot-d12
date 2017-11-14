@@ -6,7 +6,7 @@
     "array-difference": "0.0.1",
     "async": "^2.0.0-rc.5",
     "cheerio": "^0.20.0",
-    "d12maps": "^1.0.1",
+    "d12maps": "^1.0.2",
     "dive-buddy": "^1.1.1",
     "hubot": "^2.6.0",
     "hubot-datastore-brain": "gcochard/hubot-datastore-brain",
