@@ -197,7 +197,10 @@ module.exports = function(robot) {
         return request.get(currentGameUrl,function(err,res,body){
             if(err){
                 robot.logger.error(err.message);
-                return send(`I couldnt find that info, sorry, ${err.message}`);
+                if(!frompush){
+                  send(`I couldnt find that info, sorry, ${err.message}`);
+                }
+                return;
             }
             robot.logger.info(gameId);
             robot.logger.info(body);
