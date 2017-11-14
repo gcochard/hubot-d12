@@ -1029,6 +1029,10 @@ module.exports = function(robot) {
         function updatePayload(){
             if(req.query.ended && currPlayers[game]){
                 return cleanupGame(game,req.query.user);
+            }
+            checkD12(robot.messageRoom.bind(robot, gameRoom), game);
+            return;
+            /*
             } else if(currPlayers[game] !== payload){
                 currPlayers[game] = payload;
                 robot.brain.set('currentPlayers',currPlayers);
@@ -1038,6 +1042,7 @@ module.exports = function(robot) {
                 payload += ' it\'s your turn' + getGameData(game);
                 return robot.messageRoom(gameRoom,payload);
             }
+            */
         }
         if(!currMaps[game]){
             return getD12MapId(game, function(err, map_id){
