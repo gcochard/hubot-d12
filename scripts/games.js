@@ -1163,6 +1163,7 @@ module.exports = function(robot) {
         res.json(sorted);
     });
 
+/*
     robot.router.options('/hubot/dicestream',function(req,res){
         res.header('Access-Control-Allow-Origin','*');
         res.header('Access-Control-Allow-Methods','OPTIONS, GET');
@@ -1214,6 +1215,7 @@ module.exports = function(robot) {
         stats[game] = stats[game] || [];
         updater(stats[game]);
     });
+*/
 
     robot.router.get('/hubot/checkturnscript.js',serveScript.bind(null,'checkturnscript.js'));
     robot.router.get('/hubot/checkturnscript.user.js',serveScript.bind(null,'checkturnscript.js'));

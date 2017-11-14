@@ -12,6 +12,7 @@
     "hubot-datastore-brain": "gcochard/hubot-datastore-brain",
     "hubot-scripts": "^2.5.0",
     "hubot-slack": "^4.3.2",
+    "hubot.io": "^0.1.3",
     "lodash": "^4.3.0",
     "moment": "^2.17.1",
     "pm2": "^1.1.0",
