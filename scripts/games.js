@@ -297,9 +297,9 @@ module.exports = function(robot) {
         return robot.messageRoom(gameRoom,payload);
     }
 
-    function checkAllD12(){
+    function checkAllD12(fromcron){
         Object.keys(robot.brain.get('currentGames')||{}).forEach(function(gameId){
-            checkD12(robot.messageRoom.bind(robot, gameRoom), gameId);
+            checkD12(robot.messageRoom.bind(robot, gameRoom), gameId, fromcron);
         });
     }
 
@@ -811,7 +811,7 @@ module.exports = function(robot) {
         checkWebsite(robot.messageRoom.bind(robot,gameRoom),true);
     });
 
-    function detectGame(ref){
+    function detectGame(ref=''){
         return ref.split('/').pop();
     }
     function serveScript(name,req,res){
@@ -1019,9 +1019,15 @@ module.exports = function(robot) {
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player now';
+        // send the response early
         res.send(response);
+
         var payload = req.query.user;
         var game = detectGame(req.get('referrer'));
+        if(!game){
+            // just check all of them
+            return checkAllD12(true);
+        }
         // if the game has ended and it's already been reported...
         var finished = robot.brain.get('finishedGames') || {};
         if(finished[game]){
