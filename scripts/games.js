@@ -964,6 +964,11 @@ module.exports = function(robot) {
             robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
             return;
         }
+        var currGames = robot.brain.get('currentGames') || {};
+        if(!currGames[game]){
+            currGames[game] = true;
+            robot.brain.set('currentGames', currGames);
+        }
         robot.logger.info('announcing game '+game+' turn ended, thanks to '+req.query.from);
         payload += ' ended the turn' + getGameData(game);
         if((robot.brain.get('verbose') || {})[game]){
@@ -1004,6 +1009,11 @@ module.exports = function(robot) {
             robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
             return;
         }
+        var currGames = robot.brain.get('currentGames') || {};
+        if(!currGames[game]){
+            currGames[game] = true;
+            robot.brain.set('currentGames', currGames);
+        }
         robot.logger.info('announcing game '+game+' turn started, thanks to '+req.query.from);
         payload += ' started the turn' + getGameData(game);
         if((robot.brain.get('verbose') || {})[game]){
@@ -1029,6 +1039,11 @@ module.exports = function(robot) {
         if(!game){
             // just check all of them
             return checkAllD12(true);
+        }
+        var currGames = robot.brain.get('currentGames') || {};
+        if(!currGames[game]){
+            currGames[game] = true;
+            robot.brain.set('currentGames', currGames);
         }
         // if the game has ended and it's already been reported...
         var finished = robot.brain.get('finishedGames') || {};
