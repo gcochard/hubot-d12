@@ -164,10 +164,12 @@ var fetchLog = function(gameId, cb){
 
 var memoFetchLog = async.memoize(fetchLog)
 
+const gameApi = 'https://dominating12.com/game';
+const gameStateRoute = 'play/update-state';
 const updateUrlTmpl = 'https://dominating12.com/game/$$GAME$$/play/update-state'
 
 var fetchTurn = function(gameId, cb){
-    const updateUrl = updateUrlTmpl.replace('$$GAME$$', gameId)
+    const updateUrl = `${gameApi}/${gameId}/${gameStateRoute}`; //updateUrlTmpl.replace('$$GAME$$', gameId)
     return request({url:updateUrl, method: 'POST', json:true, data: {last_update: Date.now()/1000}}, function(err, data){
         if(err){
             return cb(err)

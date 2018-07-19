@@ -306,7 +306,6 @@ module.exports = function(robot) {
     }
 
     // only start interval on startup if there's already a game going
-    ///* -- commenting this out for now
     if((robot.brain.get('currentGames')||[]).length){
         clearInterval(interval);
         interval = setInterval(function(){
@@ -316,7 +315,6 @@ module.exports = function(robot) {
         //checkD12(robot.messageRoom.bind(robot,gameRoom),true);
         checkAllD12();
     }
-    //*/
 
     robot.respond(/rank/i,function(msg){
         var ranking =
@@ -399,6 +397,7 @@ module.exports = function(robot) {
         msg.reply('current game is '+robot.brain.data.currentGame);
     });
 
+/*
     robot.respond(/restart game (.*)/i, function(msg) {
         var game = msg.match[1];
         clearInterval(interval);
@@ -419,7 +418,9 @@ module.exports = function(robot) {
         msg.reply('Please reply with turn order in the form \'JohnDoe JaneDoe MarkDankberg SteveJobs\' using hipchat mention names');
     });
 
+*/
     /*eslint-disable*/
+/*
     var repl = false;
     // FSM to start a game
     var fsmState = null;
@@ -489,6 +490,7 @@ module.exports = function(robot) {
         mattmacfreier: 'matt.macfreier@viasat.com',
         jonathanbratt: 'jonathan.bratt@viasat.com'
     };
+*/
 
     var d12UserIds = {
         gcochard:35533,
@@ -582,6 +584,7 @@ module.exports = function(robot) {
         }
     };
 
+/*
     var gbeGameTypes = {standard:16,dark:17,blind:18,spy:19};
     var gbeStates = {
         start_game: function(msg){
@@ -732,6 +735,7 @@ module.exports = function(robot) {
             msg.reply('Cancelled game creation. Please come again!');
         }
     };
+*/
     /*eslint-enable*/
 
     /*
@@ -746,7 +750,6 @@ module.exports = function(robot) {
     robot.respond(/player names ("[^"]*" ?)+/i, states.player_names);
     robot.respond(/commit/i, states.commit);
     robot.respond(/cancel/i, states.cancel);
-    */
 
     robot.respond(/(finish)|(end) game/i, function(msg) {
         robot.brain.data.currentGame = null;
@@ -754,6 +757,7 @@ module.exports = function(robot) {
         clearInterval(interval);
         msg.reply('Game Over!');
     });
+    */
 
     robot.respond(/who['‘’]?se? turn is it.*/i, function(msg) {
         var match = msg.match[0].match(/in game (\d+)/);
