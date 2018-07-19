@@ -454,7 +454,6 @@ module.exports = function(robot) {
     var startGbeGame = function(msg){
         gameVars = gameVars || {};
         var args = util.inspect([gameVars],{depth:Infinity}).
-            replace(/\n */g,'').
             replace(/'/g,'"').
             replace(/: /g,':').
             replace(/{ /g,'{').
@@ -623,13 +622,6 @@ module.exports = function(robot) {
             });
             var playerEmails = players.map(function(s){ return emails[s]; });
             gameVars.players = [];
-            /* players:[
-             *   {title:"fdsa1",id:"greg.cochard@gmail.com",mode:1},
-             *   {title:"fdsa2",id:"cliffhopper@gmail.com",mode:2},
-             *   {title:"fdsa3",id:"gregcochard@gmail.com",mode:2},
-             *   {title:"fdsa4",id:"cliff.hopper@gmail.com",mode:2}
-             * ]
-             */
             _.each(playerEmails,function(email,index){
                 gameVars.players.push({title:'',id:email,mode:index===0?1:2});
             });
