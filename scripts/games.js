@@ -199,6 +199,10 @@ module.exports = function(robot) {
     }
 
     function checkD12(send, gameId, frompush){
+        if(!gameId){
+            console.log('no game ID');
+            return;
+        }
         var currentGameUrl = 'https://dominating12.com/api/game/'+gameId;
         return request.get(currentGameUrl,function(err,res,body){
             if(err){
@@ -884,7 +888,7 @@ module.exports = function(robot) {
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce start now';
         res.send(response);
         var user = req.body.user;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.body.game;
         var currGames = robot.brain.get('currentGames') || {};
         var currMaps = robot.brain.get('currentMaps') || {};
         if(currGames[game]){
@@ -917,7 +921,7 @@ module.exports = function(robot) {
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce deaths now';
         res.send(response);
         var payload = req.body.deaths;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.body.game;
         var finished = robot.brain.get('finishedGames') || {};
         if(finished[game]){
             robot.logger.info('game '+game+' already over...'+req.query.from+' is stale');
@@ -963,7 +967,7 @@ module.exports = function(robot) {
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player ended turn';
         res.send(response);
         var payload = req.query.user;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.query.game;
         // if the game has ended and it's already been reported...
         var finished = robot.brain.get('finishedGames') || {};
         if(finished[game]){
@@ -1008,7 +1012,7 @@ module.exports = function(robot) {
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player starting turn';
         res.send(response);
         var payload = req.query.user;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.query.game;
         // if the game has ended and it's already been reported...
         var finished = robot.brain.get('finishedGames') || {};
         if(finished[game]){
@@ -1121,7 +1125,7 @@ module.exports = function(robot) {
         var response = 'date: '+ Date.now() + '\n' + 'hubot will announce join now';
         res.send(response);
         var payload = req.body.user;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.body.game;
         payload += getGameData(game, true);
         robot.messageRoom(gameRoom,payload);
     });
@@ -1136,7 +1140,7 @@ module.exports = function(robot) {
         res.header('content-type','text/plain');
         res.header('Access-Control-Allow-Origin','*');
         var response = 'date: '+ Date.now() + '\n' + 'hubot saved statistics';
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.body.game;
         var stats = robot.brain.get('stats') || {};
         stats[game] = stats[game] || [];
         stats[game].push(req.body);
@@ -1237,7 +1241,7 @@ module.exports = function(robot) {
         res.header('Cache-Control', 'no-cache');
         res.header('Connection', 'keep-alive');
         res.status(200);
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.query.game;
         var messageCount = 0;
         function updater(update, type){
             messageCount++;
