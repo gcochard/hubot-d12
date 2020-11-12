@@ -199,7 +199,8 @@ module.exports = function(robot) {
     }
 
     function checkD12(send, gameId, frompush){
-        if(!gameId){
+        robot.logger.info(gameId);
+        if(!gameId || gameId == 'undefined'){
             console.log('no game ID');
             return;
         }
