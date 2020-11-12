@@ -180,8 +180,10 @@ var fetchTurn = function(gameId, cb){
             r.username = user.username;
             return r;
         }), 'id');
-
-        return cb(null, {turn: data.body.turns[0]||{}, players: players})
+        if(!data.body.turns){
+            console.log(data.body);
+        }
+        return cb(null, {turn: (data.body.turns||[])[0]||{}, players: players})
     })
 }
 

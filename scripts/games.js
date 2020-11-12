@@ -91,6 +91,9 @@ module.exports = function(robot) {
             }
             var exp = res.turn.expires_at;
             var player = _.find(res.players, {'user_id': res.turn.user_id});
+            if(!player){
+                return cb(null, {not_started:true});
+            }
             var inProgress = res.turn.step !== 0;
             var now = moment.utc(Date.now());
             exp = moment.utc(exp);
@@ -100,9 +103,12 @@ module.exports = function(robot) {
         });
     }
 
-    function getGameData(game, joined){
+    function getGameData(game, joined, raw){
         var currMaps = robot.brain.get('currentMaps') || {}, currMap = d12Maps[currMaps[game]] || {};
         var mapName = currMap.name?` (${currMap.name})`:'';
+        if(raw){
+            return `<https://dominating12.com/game/${game}|game ${game}>${mapName}`;
+        }
         return ` ${joined?'has joined':'in'} <https://dominating12.com/game/${game}|game ${game}>${mapName}`;
     }
 
@@ -227,7 +233,11 @@ module.exports = function(robot) {
             return getTurnExpires(gameId, function(err, exp){
                 var currPlayers = robot.brain.get('currentPlayers') || {};
                 if(err){
-                    return send(`I couldn't find that info, sorry, ${err.message}`);
+                    return send(`I couldn't find that info, sorry; ${err.message}`);
+                }
+                if(exp.not_started){
+                    gameData = getGameData(gameId, null, true);
+                    return send(`${gameData} has not started yet`);
                 }
                 if(currPlayers[gameId] !== exp.player){
                   let payload = exp.player;
@@ -306,15 +316,15 @@ module.exports = function(robot) {
     }
 
     // only start interval on startup if there's already a game going
-    if((robot.brain.get('currentGames')||[]).length){
+    //if((robot.brain.get('currentGames')||[]).length){
         clearInterval(interval);
         interval = setInterval(function(){
-            checkAllD12();
+            checkAllD12(true);
             //checkD12(robot.messageRoom.bind(robot,gameRoom),true);
-        },15*60*1000);
+        },5*60*1000);
         //checkD12(robot.messageRoom.bind(robot,gameRoom),true);
-        checkAllD12();
-    }
+        checkAllD12(true);
+    //}
 
     robot.respond(/rank/i,function(msg){
         var ranking =
@@ -1031,7 +1041,7 @@ module.exports = function(robot) {
         res.send(response);
 
         var payload = req.query.user;
-        var game = detectGame(req.get('referrer'));
+        var game = detectGame(req.get('referrer')) || req.query.game;
         if(!game){
             // just check all of them
             return checkAllD12(true);
@@ -1071,6 +1081,32 @@ module.exports = function(robot) {
             });
         }
         return updatePayload();
+    });
+
+    robot.router.options('/hubot/pushwebopolyturn',function(req,res){
+        res.header('Access-Control-Allow-Origin','*');
+        res.header('Access-Control-Allow-Methods','GET, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'x-requested-with');
+        res.end();
+    });
+    robot.router.get('/hubot/pushwebopolyturn',function(req,res){
+        res.header('content-type','text/plain');
+        res.header('Access-Control-Allow-Origin','*');
+        var response = 'date: '+ Date.now() + '\n' + 'hubot will announce player now';
+        // send the response early
+        res.send(response);
+
+        var payload = req.query.user;
+        // if the game has ended and it's already been reported...
+        var currPlayers = robot.brain.get('currentPlayers') || {};
+        robot.logger.info(currPlayers);
+        // if the game has ended and it hasn't been reported yet...
+        if(!(/^@/.test(payload))){
+            payload = '@'+payload;
+        }
+        payload += ' it\'s your turn';
+        return robot.messageRoom(gameRoom, payload);
+        return;
     });
 
     robot.router.options('/hubot/pushjoin',function(req,res){
